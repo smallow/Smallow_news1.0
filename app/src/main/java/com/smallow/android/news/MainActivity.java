@@ -1,39 +1,95 @@
 package com.smallow.android.news;
 
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.view.View;
+import android.view.Window;
+import android.widget.Button;
+
+import com.smallow.android.news.fragments.NewsFragment;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends FragmentActivity implements View.OnClickListener {
+
+    private FragmentManager fragmentManager;
+    private Button btnNews;
+    private Button btnSubject;
+    private Button btnFind;
+    private Button btnSetting;
+
+    private NewsFragment newsFragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        initView();
+        fragmentManager = getSupportFragmentManager();
+        setTabSelection(0);
+
+    }
+
+    private void initView() {
+        btnNews = (Button) findViewById(R.id.tab_news);
+        btnSubject = (Button) findViewById(R.id.tab_subject);
+        btnFind = (Button) findViewById(R.id.tab_find);
+        btnSetting = (Button) findViewById(R.id.tab_setting);
+        btnNews.setOnClickListener(this);
+        btnSubject.setOnClickListener(this);
+        btnFind.setOnClickListener(this);
+        btnSetting.setOnClickListener(this);
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+    private void setTabSelection(int i) {
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        hiddenFragments(transaction);
+        switch (i) {
+            case 0:
+                if (newsFragment == null) {
+                    newsFragment = new NewsFragment();
+                    transaction.add(R.id.id_content, newsFragment);
+                } else {
+                    transaction.show(newsFragment);
+                }
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
         }
 
-        return super.onOptionsItemSelected(item);
+        transaction.commit();
+    }
+
+    private void hiddenFragments(FragmentTransaction transaction) {
+        if (newsFragment != null) {
+            transaction.hide(newsFragment);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.tab_news:
+                setTabSelection(0);
+                break;
+            case R.id.tab_subject:
+                setTabSelection(1);
+                break;
+            case R.id.tab_find:
+                setTabSelection(2);
+                break;
+            case R.id.tab_setting:
+                setTabSelection(3);
+                break;
+        }
     }
 }
