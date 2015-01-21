@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">Smallow_news1.0</string>
-    <string name="hello_world">Hello smallow!</string>
+    <string name="hello_smallow">Hello smallow!</string>
     <string name="action_settings">Settings</string>
 
 </resources>
