@@ -12,26 +12,41 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="新闻"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:background="@android:color/holo_blue_light"
+        android:textColor="#ffffffff"
+        android:textSize="18sp" />
 
     <Button
         android:id="@+id/tab_subject"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="专题"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:background="@android:color/holo_blue_light"
+        android:textColor="#ffffffff"
+        android:textSize="18sp"
+        />
 
     <Button
         android:id="@+id/tab_find"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="发现"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:background="@android:color/holo_blue_light"
+        android:textColor="#ffffffff"
+        android:textSize="18sp"
+        />
 
     <Button
         android:id="@+id/tab_setting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="设置"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:background="@android:color/holo_blue_light"
+        android:textColor="#ffffffff"
+        android:textSize="18sp"
+        />
 </LinearLayout>
