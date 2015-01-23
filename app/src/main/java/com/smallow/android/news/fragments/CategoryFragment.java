@@ -87,7 +87,7 @@ public class CategoryFragment extends BaseFragment {
                 // 显示最后更新的时间
                 refreshView.getLoadingLayoutProxy()
                         .setLastUpdatedLabel(label);
-                new GetDataTask().execute();
+                new GetDataTask();
             }
 
             @Override
