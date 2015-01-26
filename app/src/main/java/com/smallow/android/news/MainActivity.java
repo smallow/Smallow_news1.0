@@ -10,6 +10,9 @@ import android.widget.Button;
 
 import com.smallow.android.news.fragments.NewsFragment;
 
+/**
+ * 主程序入口
+ */
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
 
