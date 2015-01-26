@@ -1,6 +1,18 @@
 package com.smallow.android.news.utils.network;
 
-import com.smallow.android.news.utils.network.jiekou.RequestReceiver;
+/**
+ * Created by smallow on 2015/1/26.
+ */
+
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.Future;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -11,31 +23,43 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
+import com.smallow.android.news.utils.network.ConnectionHelper.RequestMethod;
+import com.smallow.android.news.utils.network.ConnectionHelper.RequestReceiver;
 
 /**
- * Created by smallow on 2015/1/23.
+ * 请求实例
+ *
+ * @author sky
  */
 public class RequestEntity {
-
     private String url;
     private HttpEntity postEntity;
     private RequestReceiver requestReceiver;
     private String rawResponse;
-    private ConnectionUtil.RequestMethod requestMethod;
+    private RequestMethod requestMethod;
     private int resultCode;
     private int requestId;
     private String defCharset;
     private Object mTag;
     private String acceptEconding;
 
+    /**
+     * 构造函数
+     */
+    private RequestEntity() {
+
+    }
+
+    /**
+     * 构造函数
+     *
+     * @param url    url地址
+     * @param method 请求类型
+     */
+    public RequestEntity(String url, RequestMethod method) {
+        this.url = url;
+        this.requestMethod = method;
+    }
 
     public String getUrl() {
         return url;
@@ -45,12 +69,30 @@ public class RequestEntity {
         this.url = url;
     }
 
-    public HttpEntity getPostEntity() {
+    public String getAcceptEconding() {
+        return acceptEconding;
+    }
+
+    public void setAcceptEconding(String acceptEconding) {
+        this.acceptEconding = acceptEconding;
+    }
+
+    /**
+     * Post需要发送的数据
+     *
+     * @return
+     */
+    public HttpEntity getPostEntitiy() {
         return postEntity;
     }
 
-    public void setPostEntity(HttpEntity postEntity) {
-        this.postEntity = postEntity;
+    /**
+     * Post需要发送的数据
+     *
+     * @return
+     */
+    public void setPostEntitiy(HttpEntity entity) {
+        postEntity = entity;
     }
 
     public void setPostEntitiy(List<NameValuePair> postValues) {
@@ -65,7 +107,6 @@ public class RequestEntity {
         }
     }
 
-
     public void setPostEntitiy(List<NameValuePair> postValues,
                                Map<String, File> files) {
         setPostEntitiy(postValues, defCharset, files);
@@ -75,7 +116,7 @@ public class RequestEntity {
      * 带文件上传的POST
      * <p/>
      * <pre>
-     * RequestMethod必须是{@link com.smallow.android.news.utils.network.ConnectionUtil.RequestMethod#POST_WITH_FILE}}模式
+     * RequestMethod必须是{@link ConnectionHelper.RequestMethod#POST_WITH_FILE}}模式
      * </pre>
      *
      * @param postValues
@@ -108,10 +149,10 @@ public class RequestEntity {
             }
         }
         if (files != null) {
-            Iterator<Map.Entry<String, File>> iterator = files.entrySet()
+            Iterator<Entry<String, File>> iterator = files.entrySet()
                     .iterator();
             while (iterator.hasNext()) {
-                Map.Entry<String, File> entry = iterator.next();
+                Entry<String, File> entry = iterator.next();
                 entity.addPart(entry.getKey(), new FileBody(entry.getValue()));
             }
         }
@@ -125,35 +166,45 @@ public class RequestEntity {
         }
     }
 
-    public RequestReceiver getRequestReceiver() {
+    protected RequestReceiver getRequestReceiver() {
         return requestReceiver;
     }
 
-    public void setRequestReceiver(RequestReceiver requestReceiver) {
-        this.requestReceiver = requestReceiver;
+    protected void setRequestReceiver(RequestReceiver receiver) {
+        this.requestReceiver = receiver;
     }
 
     public String getRawResponse() {
         return rawResponse;
     }
 
-    public void setRawResponse(String rawResponse) {
+    protected void setRawResponse(String rawResponse) {
         this.rawResponse = rawResponse;
     }
 
-    public ConnectionUtil.RequestMethod getRequestMethod() {
+    /**
+     * Get,Post
+     *
+     * @return
+     */
+    public RequestMethod getMethod() {
         return requestMethod;
     }
 
-    public void setRequestMethod(ConnectionUtil.RequestMethod requestMethod) {
-        this.requestMethod = requestMethod;
+    /**
+     * Get,Post
+     *
+     * @return
+     */
+    public void setMethod(RequestMethod method) {
+        this.requestMethod = method;
     }
 
     public int getResultCode() {
         return resultCode;
     }
 
-    public void setResultCode(int resultCode) {
+    protected void setResultCode(int resultCode) {
         this.resultCode = resultCode;
     }
 
@@ -161,34 +212,74 @@ public class RequestEntity {
         return requestId;
     }
 
-    public void setRequestId(int requestId) {
+    protected void setRequestId(int requestId) {
         this.requestId = requestId;
     }
 
-    public String getDefCharset() {
+    public String getDefaultCharset() {
         return defCharset;
     }
 
-    public void setDefCharset(String defCharset) {
-        this.defCharset = defCharset;
+    public void setDefaultCharset(String charset) {
+        this.defCharset = charset;
     }
 
-    public Object getmTag() {
+    public void setTag(Object tag) {
+        mTag = tag;
+    }
+
+    public Object getTag() {
         return mTag;
     }
 
-    public void setmTag(Object mTag) {
-        this.mTag = mTag;
+    private boolean isCanceled = false;
+    private boolean isCancelStateSend = false;
+    private long requestHandler = makeNextRequestIndex();
+
+    /**
+     * 获取请求句柄
+     *
+     * @return
+     */
+    public long getRequestHandler() {
+        return requestHandler;
     }
 
-    public String getAcceptEconding() {
-        return acceptEconding;
+    protected boolean isCancelStateSend() {
+        return isCancelStateSend;
     }
 
-    public void setAcceptEconding(String acceptEconding) {
-        this.acceptEconding = acceptEconding;
+    protected void setCancelStateSend(boolean send) {
+        isCancelStateSend = send;
     }
 
+    protected void setCanceled(boolean canceled) {
+        this.isCanceled = canceled;
+    }
+
+    protected boolean isCanceled() {
+        return isCanceled;
+    }
+
+    private Future<?> requestTaskFuture;
+
+    protected void setRequestTaskFuture(Future<?> future) {
+        requestTaskFuture = future;
+    }
+
+    protected Future<?> getRequestTaskFuture() {
+        return requestTaskFuture;
+    }
+
+    private final static List<RequestEntity> recyleList = new ArrayList<RequestEntity>();
+
+    public static RequestEntity obtain() {
+        if (recyleList.size() <= 0) {
+            return new RequestEntity();
+        } else {
+            return recyleList.remove(0);
+        }
+    }
 
     private static long last_reqeust_index;
 
@@ -208,57 +299,6 @@ public class RequestEntity {
         }
     }
 
-
-    private boolean isCanceled = false;
-    private boolean isCancelStateSend = false;
-    private long requestHandler = makeNextRequestIndex();
-
-    /**
-     * 获取请求句柄
-     *
-     * @return
-     */
-    public long getRequestHandler() {
-        return requestHandler;
-    }
-
-    public boolean isCancelStateSend() {
-        return isCancelStateSend;
-    }
-
-    protected void setCancelStateSend(boolean send) {
-        isCancelStateSend = send;
-    }
-
-    protected void setCanceled(boolean canceled) {
-        this.isCanceled = canceled;
-    }
-
-    public boolean isCanceled() {
-        return isCanceled;
-    }
-
-    private Future<?> requestTaskFuture;
-
-    public void setRequestTaskFuture(Future<?> future) {
-        requestTaskFuture = future;
-    }
-
-    public Future<?> getRequestTaskFuture() {
-        return requestTaskFuture;
-    }
-
-
-    private final static List<RequestEntity> recyleList = new ArrayList<RequestEntity>();
-
-    public static RequestEntity obtain() {
-        if (recyleList.size() <= 0) {
-            return new RequestEntity();
-        } else {
-            return recyleList.remove(0);
-        }
-    }
-
     public synchronized void recycle() {
         url = null;
         postEntity = null;
@@ -275,4 +315,48 @@ public class RequestEntity {
             recyleList.add(this);
         }
     }
+
+    @Override
+    public String toString() {
+        return "RequestEntity [url=" + url + ", requestId=" + requestId
+                + ", defCharset=" + defCharset + ", mTag=" + mTag + "]";
+    }
+
+    // support upload progress track
+    // public class CustormMultipartEntity extends MultipartEntity {
+    // private RequestEntity requestEntity;
+    // public CustormMultipartEntity(RequestEntity re) {
+    // requestEntity = re;
+    // }
+    //
+    // @Override
+    // public void writeTo(OutputStream outstream) throws IOException {
+    // super.writeTo(new ProgressOutputStream(outstream));
+    // }
+    //
+    // class ProgressOutputStream extends OutputStream {
+    // OutputStream targetOutputStream;
+    //
+    // ProgressOutputStream(OutputStream target) {
+    // targetOutputStream = target;
+    // }
+    //
+    // @Override
+    // public void write(byte[] buffer) throws IOException {
+    // targetOutputStream.write(buffer);
+    // }
+    //
+    // @Override
+    // public void write(byte[] buffer, int offset, int count)
+    // throws IOException {
+    // targetOutputStream.write(buffer, offset, count);
+    // }
+    //
+    // @Override
+    // public void write(int oneByte) throws IOException {
+    // targetOutputStream.write(oneByte);
+    // }
+    //
+    // }
+    // }
 }

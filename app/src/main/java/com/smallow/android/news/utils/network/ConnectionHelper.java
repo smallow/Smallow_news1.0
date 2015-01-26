@@ -1,13 +1,26 @@
 package com.smallow.android.news.utils.network;
 
-import android.net.ParseException;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
+/**
+ * Created by smallow on 2015/1/26.
+ */
 
-
-import com.smallow.android.news.utils.network.jiekou.ReqeustResultListener;
-import com.smallow.android.news.utils.network.jiekou.RequestReceiver;
+import java.io.BufferedInputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.SocketTimeoutException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -40,28 +53,20 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.CharArrayBuffer;
 import org.apache.http.util.EntityUtils;
 
-import java.io.BufferedInputStream;
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.SocketTimeoutException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-import java.util.concurrent.Future;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.zip.GZIPInputStream;
+import android.annotation.SuppressLint;
+import android.net.ParseException;
+import android.os.Handler;
+import android.os.Handler.Callback;
+import android.os.Message;
+import android.util.Log;
 
 /**
- * Created by smallow on 2015/1/23.
+ * 网络请求数据封装
+ *
+ * @author sky
  */
-public class ConnectionUtil {
+@SuppressLint("UseSparseArrays")
+public class ConnectionHelper {
     public static final String TAG = "ConnectionHelper";
     public static final boolean DEBUG = true;
     public static final int CONNECTION_TIMEOUT = 20000;// ms
@@ -79,7 +84,7 @@ public class ConnectionUtil {
     //
     private HttpClient httpClient;
 
-    private ConnectionUtil() {
+    private ConnectionHelper() {
         HttpParams httpParams = new BasicHttpParams();
         ConnManagerParams.setMaxTotalConnections(httpParams,
                 MAX_TOTAL_CONNECTIONS);
@@ -104,11 +109,11 @@ public class ConnectionUtil {
         httpClient = new DefaultHttpClient(connectionManager, httpParams);
     }
 
-    private static ConnectionUtil instance;
+    private static ConnectionHelper instance;
 
-    public static synchronized ConnectionUtil obtainInstance() {
+    public static synchronized ConnectionHelper obtainInstance() {
         if (instance == null) {
-            instance = new ConnectionUtil();
+            instance = new ConnectionHelper();
         }
         return instance;
     }
@@ -138,7 +143,7 @@ public class ConnectionUtil {
         entity.setUrl(url);
         entity.setRequestReceiver(rr);
         entity.setAcceptEconding(acceptEncoding);
-        entity.setRequestMethod(RequestMethod.GET);
+        entity.setMethod(RequestMethod.GET);
         entity.setRequestId(requestId);
         return httpExecute(entity);
     }
@@ -164,7 +169,7 @@ public class ConnectionUtil {
         entity.setUrl(url);
         entity.setRequestReceiver(rr);
         entity.setPostEntitiy(postValues, charset);
-        entity.setRequestMethod(RequestMethod.POST);
+        entity.setMethod(RequestMethod.POST);
         entity.setRequestId(requestId);
         return httpExecute(entity);
     }
@@ -189,7 +194,7 @@ public class ConnectionUtil {
         entity.setUrl(url);
         entity.setRequestReceiver(rr);
         entity.setPostEntitiy(queryString, charset);
-        entity.setRequestMethod(RequestMethod.POST);
+        entity.setMethod(RequestMethod.POST);
         entity.setRequestId(requestId);
         return httpExecute(entity);
     }
@@ -216,7 +221,7 @@ public class ConnectionUtil {
         entity.setUrl(url);
         entity.setRequestReceiver(rr);
         entity.setPostEntitiy(postValues, charset, files);
-        entity.setRequestMethod(RequestMethod.POST_WITH_FILE);
+        entity.setMethod(RequestMethod.POST_WITH_FILE);
         entity.setRequestId(requestId);
         return httpExecute(entity);
     }
@@ -329,13 +334,13 @@ public class ConnectionUtil {
             int customResultCode = RequestReceiver.RESULT_STATE_NETWORK_ERROR;
             int statusCode = -1;
             try {
-                if (rEntity.getRequestMethod() == RequestMethod.GET) {
+                if (rEntity.getMethod() == RequestMethod.GET) {
                     httpRequest = new HttpGet(rEntity.getUrl());
                 } else {
                     // POST/POST_WITH_FILE
                     HttpPost httpPost = new HttpPost(rEntity.getUrl());
                     // 设置请求的数据
-                    httpPost.setEntity(rEntity.getPostEntity());
+                    httpPost.setEntity(rEntity.getPostEntitiy());
                     httpRequest = httpPost;
                 }
                 HttpConnectionParams.setSoTimeout(httpRequest.getParams(),
@@ -349,7 +354,7 @@ public class ConnectionUtil {
                 statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == HttpStatus.SC_OK) {
                     rEntity.setRawResponse(fetchString(rEntity,
-                            response.getEntity(), rEntity.getDefCharset()));
+                            response.getEntity(), rEntity.getDefaultCharset()));
                     customResultCode = RequestReceiver.RESULT_STATE_OK;
                 } else {
                     customResultCode = RequestReceiver.RESULT_STATE_SERVER_ERROR;
@@ -376,11 +381,11 @@ public class ConnectionUtil {
                 reportRequestEntity(rEntity, statusCode);
             }
             RequestReceiver rr = rEntity.getRequestReceiver();
-            /*if (rr instanceof ParasiticRequestReceiver) {
+            if (rr instanceof ParasiticRequestReceiver) {
                 ((ParasiticRequestReceiver) rr).parasiticHandler(
                         rEntity.getResultCode(), rEntity.getRequestId(),
                         rEntity.getTag(), rEntity.getRawResponse());
-            }*/
+            }
             synchronized (this) {
                 if (!isInterrupted) {
                     synchronized (rEntity) {
@@ -529,7 +534,7 @@ public class ConnectionUtil {
         }
     }
 
-    private Handler.Callback handlerCallback = new Handler.Callback() {
+    private Handler.Callback handlerCallback = new Callback() {
 
         @Override
         public boolean handleMessage(Message msg) {
@@ -538,16 +543,16 @@ public class ConnectionUtil {
                 RequestEntity e = (RequestEntity) msg.obj;
                 if (mReqeustResultListener != null) {
                     mReqeustResultListener.onPerReqeustReturn(e,
-                            ConnectionUtil.this);
+                            ConnectionHelper.this);
                 }
                 //
                 RequestReceiver rr = e.getRequestReceiver();
                 if (rr != null) {
                     if (e.isCanceled()) {
-                        rr.onRequestCanceled(e.getRequestId(), e.getmTag());
+                        rr.onRequestCanceled(e.getRequestId(), e.getTag());
                     } else if (rr != null) {
                         rr.onResult(e.getResultCode(), e.getRequestId(),
-                                e.getmTag(), e.getRawResponse());
+                                e.getTag(), e.getRawResponse());
                     }
                 }
                 //
@@ -598,7 +603,94 @@ public class ConnectionUtil {
         shutdownConnection();
     }
 
+    public interface RequestReceiver {
+        public static final int RESULT_STATE_OK = 200;
+        public static final int RESULT_STATE_SERVER_ERROR = 500;
+        public static final int RESULT_STATE_NETWORK_ERROR = -1;
+        public static final int RESULT_STATE_CANCLED = -2;
+        public static final int RESULT_STATE_TIME_OUT = 408;
 
+        public void onResult(int resultCode, int reqId, Object tag, String resp);
+
+        public void onRequestCanceled(int reqId, Object tag);
+    }
+
+    public abstract static class ParasiticRequestReceiver implements
+            RequestReceiver {
+        protected abstract void parasiticHandler(int resultCode, int reqId,
+                                                 Object tag, String resp);
+
+        @Override
+        public void onResult(int resultCode, int reqId, Object tag, String resp) {
+
+        }
+
+    }
+
+    public abstract static class SimpleReqeustReceiver implements
+            RequestReceiver {
+        @Override
+        public void onRequestCanceled(int reqId, Object tag) {
+
+        }
+    }
+
+    public static abstract class RichRequestReceiver implements RequestReceiver {
+
+        @Override
+        public void onResult(int resultCode, int reqId, Object tag, String resp) {
+            onBeforeDispatch(reqId, resultCode, resp);
+            if (!doResult(reqId, resultCode, resp)) {
+                if (resultCode == RequestReceiver.RESULT_STATE_OK) {
+                    doSuccess(reqId, resultCode, resp);
+                } else {
+                    doFailed(reqId, resultCode, resp);
+                }
+            }
+            onEndDispatch(reqId, resultCode, resp);
+        }
+
+        @Override
+        public void onRequestCanceled(int reqId, Object tag) {
+            onBeforeDispatch(reqId, RequestReceiver.RESULT_STATE_CANCLED, null);
+            doCancale(reqId);
+            onEndDispatch(reqId, RequestReceiver.RESULT_STATE_CANCLED, null);
+        }
+
+        /**
+         * 在Result开始分发之前
+         */
+        public void onBeforeDispatch(int reqId, int resultCode, String resp) {
+
+        }
+
+        /**
+         * 在Result开始分发之后
+         */
+        public void onEndDispatch(int reqId, int resultCode, String resp) {
+
+        }
+
+        public boolean doResult(int reqId, int resultCode, String resp) {
+            return false;
+        }
+
+        public void doSuccess(int reqId, int resultCode, String resp) {
+        }
+
+        public void doFailed(int reqId, int resultCode, String errorResp) {
+        }
+
+        public void doCancale(int reqId) {
+        }
+
+    }
+
+    // public interface HttpTask extends Runnable {
+    // public void setTask(RequestEntity entity);
+    // }
+
+    // just debug
     public void reportRequestEntity(RequestEntity re, int netStateCode) {
         if (re == null) {
             Log.w(TAG, "------>Connection info RequestEntity is:" + re);
@@ -617,7 +709,17 @@ public class ConnectionUtil {
                 Log.d(TAG, "------>Connection StatusCode:" + netStateCode
                         + "  custom ResultCode:" + re.getResultCode());
             }
-
+            // if (re.getPostEntitiy() == null) {
+            // Log.d(TAG, "------>PostValue if Exist:null");
+            // } else {
+            // String postContent = null;
+            // HttpEntity entity = re.getPostEntitiy();
+            // Header header = entity.getContentEncoding();
+            // if (header != null && header.getElements() != null) {
+            // postContent = header.getElements().toString();
+            // }
+            // Log.d(TAG, "------>PostValue if Exist:" + postContent);
+            // }
             Log.v(TAG, "------>Raw Result:" + re.getRawResponse());
             Log.d(TAG, "------>Connection info end");
         }
