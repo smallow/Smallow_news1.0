@@ -9,11 +9,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.parser.AbstractJSONParser;
 import com.handmark.pulltorefresh.library.ILoadingLayout;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.smallow.android.news.R;
+import com.smallow.android.news.entity.ContentBean;
+import com.smallow.android.news.utils.network.ConnectionHelper;
+
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by smallow on 2015/1/22.
@@ -26,7 +37,7 @@ public class CategoryFragment extends BaseFragment {
     private ArrayAdapter<String> mAdapter;
     private LinkedList<String> mListItems;
     private int mItemCount = 9;
-
+    private int globalPageNo;
     public CategoryFragment() {
 
     }
@@ -79,26 +90,53 @@ public class CategoryFragment extends BaseFragment {
                 // 显示最后更新的时间
                 refreshView.getLoadingLayoutProxy()
                         .setLastUpdatedLabel(label);
-                new GetDataTask();
+                getServerData(globalPageNo,0);
             }
 
             @Override
             public void onPullUpToRefresh(PullToRefreshBase<ListView> refreshView) {
                 //这里写上拉加载更多的任务
-                new GetDataTask().execute();
+                getServerData(globalPageNo, 1);
             }
         });
 
     }
 
     private void initDatas() {
-// 初始化数据和数据源
+        // 初始化数据和数据源
         mListItems = new LinkedList<String>();
-
-        for (int i = 0; i < mItemCount; i++) {
-            mListItems.add("" + i);
-        }
+        getServerData(1,1);
     }
+
+    private void getServerData(int pageNo,final int type) {
+        String url="http://172.16.18.147:8080/GetContentList.do?order=4&pageSize=3&pageNo="+pageNo+"&option=2&channelIds=11";
+        ConnectionHelper.obtainInstance().httpGet(url, 1,
+                new ConnectionHelper.RequestReceiver() {
+                    @Override
+                    public void onResult(int resultCode, int reqId, Object tag, String resp) {
+                        if(resp!=null && !"".equals(resp)){
+                            Map<String,Object> map= (Map<String, Object>) JSON.parse(resp);
+                            JSONArray array= (JSONArray) map.get("list");
+                            List<ContentBean> list= JSON.parseArray(array+"",ContentBean.class);
+                            globalPageNo= (int) map.get("");
+                            for(ContentBean bean:list){
+                                if(type==0){
+                                    mListItems.addFirst(bean.getTitle());
+                                }else{
+                                    mListItems.addLast(bean.getTitle());
+                                }
+                            }
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onRequestCanceled(int reqId, Object tag) {
+
+                    }
+                });
+    }
+
     private void initIndicator()
     {
         ILoadingLayout startLabels = mPullRefreshListView

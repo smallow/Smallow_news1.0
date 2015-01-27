@@ -88,6 +88,7 @@
     <orderEntry type="library" exported="" name="support-annotations-21.0.3" level="project" />
     <orderEntry type="library" exported="" name="apache-mime4j-0.6" level="project" />
     <orderEntry type="library" exported="" name="support-v4-21.0.3" level="project" />
+    <orderEntry type="library" exported="" name="fastjson-1.1.37" level="project" />
     <orderEntry type="module" module-name="library" exported="" />
   </component>
 </module>
