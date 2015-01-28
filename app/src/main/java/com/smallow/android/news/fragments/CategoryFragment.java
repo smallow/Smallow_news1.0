@@ -3,28 +3,29 @@ package com.smallow.android.news.fragments;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.parser.AbstractJSONParser;
+import android.widget.ListView;
+import android.widget.Toast;
+
 import com.handmark.pulltorefresh.library.ILoadingLayout;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.smallow.android.news.R;
+import com.smallow.android.news.adapter.ListViewAdapter;
 import com.smallow.android.news.entity.ContentBean;
-import com.smallow.android.news.utils.network.ConnectionHelper;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by smallow on 2015/1/22.
@@ -34,49 +35,49 @@ public class CategoryFragment extends BaseFragment {
     private String title;
     private String categoryCode;
     private PullToRefreshListView mPullRefreshListView;
-    private ArrayAdapter<String> mAdapter;
-    private LinkedList<String> mListItems;
-    private int mItemCount = 9;
-    private int globalPageNo;
+    /**
+     * 首次网络请求页码
+     */
+    private static final int FIRST_PAGE = 1;
+    /**
+     * 数据请求页码 *
+     */
+    private int toPage = 1;
+    /**
+     * 更多的网络数据 *
+     */
+    private boolean isMore = true;
+
+    private List<ContentBean> mListData;// 存储网络数据
+    private ListViewAdapter mAdapter;// listView的适配器
+
+    private List<ContentBean> remoteData = new ArrayList<ContentBean>();
+
     public CategoryFragment() {
 
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle bundle = getArguments();
         if (bundle != null) {
             title = bundle.getString("title");
             categoryCode = bundle.getString("categoryCode");
         }
+        makerData();
         return inflater.inflate(R.layout.news_category_layout, container, false);
     }
 
     @Override
     protected void onInitWidgets(View rootView, Bundle savedInstanceState) {
-
+        mListData = new ArrayList<ContentBean>();
         mPullRefreshListView = (PullToRefreshListView) findViewById(R.id.pull_refresh_list);
-        //初始化数据
-        initDatas();
+        mPullRefreshListView
+                .setMode(mPullRefreshListView.getMode() == PullToRefreshBase.Mode.BOTH ? PullToRefreshBase.Mode.PULL_FROM_START
+                        : PullToRefreshBase.Mode.BOTH);
         initIndicator();
-        mAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, mListItems);
+        mAdapter = new ListViewAdapter(mListData, getActivity());
         mPullRefreshListView.setAdapter(mAdapter);
-        /*mPullRefreshListView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<ListView>() {
-            @Override
-            public void onRefresh(PullToRefreshBase<ListView> refreshView) {
-                String label = DateUtils.formatDateTime(
-                        getActivity().getApplicationContext(),
-                        System.currentTimeMillis(),
-                        DateUtils.FORMAT_SHOW_TIME
-                                | DateUtils.FORMAT_SHOW_DATE
-                                | DateUtils.FORMAT_ABBREV_ALL);
-                // 显示最后更新的时间
-                refreshView.getLoadingLayoutProxy()
-                        .setLastUpdatedLabel(label);
-                // 模拟加载任务
-                new GetDataTask().execute();
-            }
-        });*/
         mPullRefreshListView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<ListView>() {
             @Override
             public void onPullDownToRefresh(PullToRefreshBase<ListView> refreshView) {
@@ -90,85 +91,106 @@ public class CategoryFragment extends BaseFragment {
                 // 显示最后更新的时间
                 refreshView.getLoadingLayoutProxy()
                         .setLastUpdatedLabel(label);
-                getServerData(globalPageNo,0);
+                new GetDataTask().execute(FIRST_PAGE);
+                // 还原toPage初始值
+                toPage = 1;
+                // 还原上拉加载控制变量
+                isMore = true;
+
             }
 
             @Override
             public void onPullUpToRefresh(PullToRefreshBase<ListView> refreshView) {
                 //这里写上拉加载更多的任务
-                getServerData(globalPageNo, 1);
+                // 上拉刷新时，逐步加载新界面
+                toPage++;
+                if (!isMore) {
+                    // 上一次请求已经没有数据了
+                    mPullRefreshListView.getLoadingLayoutProxy()
+                            .setPullLabel("没有更多了...");
+                    mPullRefreshListView.getLoadingLayoutProxy()
+                            .setRefreshingLabel("没有更多了...");
+                    mPullRefreshListView.getLoadingLayoutProxy()
+                            .setReleaseLabel("没有更多了...");
+                }
+                new GetDataTask().execute(toPage);
             }
         });
+        // 获取首页数据并设置listView
 
+        new GetDataTask().execute(FIRST_PAGE);
     }
 
-    private void initDatas() {
-        // 初始化数据和数据源
-        mListItems = new LinkedList<String>();
-        getServerData(1,1);
-    }
 
-    private void getServerData(int pageNo,final int type) {
-        String url="http://172.16.18.147:8080/GetContentList.do?order=4&pageSize=3&pageNo="+pageNo+"&option=2&channelIds=11";
-        ConnectionHelper.obtainInstance().httpGet(url, 1,
-                new ConnectionHelper.RequestReceiver() {
-                    @Override
-                    public void onResult(int resultCode, int reqId, Object tag, String resp) {
-                        if(resp!=null && !"".equals(resp)){
-                            Map<String,Object> map= (Map<String, Object>) JSON.parse(resp);
-                            JSONArray array= (JSONArray) map.get("list");
-                            List<ContentBean> list= JSON.parseArray(array+"",ContentBean.class);
-                            globalPageNo= (int) map.get("");
-                            for(ContentBean bean:list){
-                                if(type==0){
-                                    mListItems.addFirst(bean.getTitle());
-                                }else{
-                                    mListItems.addLast(bean.getTitle());
-                                }
-                            }
-                            mAdapter.notifyDataSetChanged();
-                        }
-                    }
-
-                    @Override
-                    public void onRequestCanceled(int reqId, Object tag) {
-
-                    }
-                });
-    }
-
-    private void initIndicator()
-    {
+    private void initIndicator() {
         ILoadingLayout startLabels = mPullRefreshListView
                 .getLoadingLayoutProxy(true, false);
-        startLabels.setPullLabel("你可劲拉，拉...");// 刚下拉时，显示的提示
-        startLabels.setRefreshingLabel("好嘞，正在刷新...");// 刷新时
-        startLabels.setReleaseLabel("你敢放，我就敢刷新...");// 下来达到一定距离时，显示的提示
-
+        startLabels.setPullLabel("下拉刷新");// 刚下拉时，显示的提示
+        startLabels.setRefreshingLabel("请稍等正在刷新...");// 刷新时
+        startLabels.setReleaseLabel("松开自动刷新");// 下来达到一定距离时，显示的提示
         ILoadingLayout endLabels = mPullRefreshListView.getLoadingLayoutProxy(
                 false, true);
         endLabels.setPullLabel("加载更多数据...");// 刚下拉时，显示的提示
-        endLabels.setRefreshingLabel("好嘞，正在加载数据...");// 刷新时
-        endLabels.setReleaseLabel("你敢放，我就敢完成加载...");// 下来达到一定距离时，显示的提示
+        endLabels.setRefreshingLabel("正在加载数据...");// 刷新时
+        endLabels.setReleaseLabel("松开加载完成...");// 下来达到一定距离时，显示的提示
     }
 
-    private class GetDataTask extends AsyncTask<Void, Void, String> {
+    /**
+     * 接收子线程传递出来的信息
+     */
+    private Handler mHandler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+            Toast.makeText(getActivity(), "没有更多了", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    private class GetDataTask extends AsyncTask<Integer, Void, Void> {
 
         @Override
-        protected String doInBackground(Void... params) {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+        protected Void doInBackground(Integer... params) {
+            // 本次请求的数据集合
+            List<ContentBean> currData = new ArrayList<ContentBean>();
+            currData = remoteData;
+            if (!currData.isEmpty()) {
+                // 有数据返回
+                // 数据加入集合中
+                mListData.addAll(currData);
+            } else {
+                // 没有数据
+                isMore = false;
+                // 向主线程发送通知
+                mHandler.sendEmptyMessage(0);
+                // 没有数据toPage--
+                toPage--;
             }
-            return "" + (mItemCount++);
+
+            return null;
         }
 
         @Override
-        protected void onPostExecute(String result) {
-            mListItems.add(result);
+        protected void onPostExecute(Void v) {
             mAdapter.notifyDataSetChanged();
-            // Call onRefreshComplete when the list has been refreshed.
-            mPullRefreshListView.onRefreshComplete();
+            Log.i(TAG, "page：" + toPage);
+            mPullRefreshListView.onRefreshComplete();// 完成刷新动作
+            super.onPostExecute(v);
         }
+    }
+
+
+    private void makerData() {
+        final Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if(remoteData.size()<20){
+                    java.util.Random r=new java.util.Random();
+                    int num=1000 + r.nextInt(1000);
+                    remoteData.add(new ContentBean(num, "标题" + num, "作者" + num));
+                }else{
+                    timer.cancel();
+                }
+
+            }
+        }, 500, 1000);
     }
 }

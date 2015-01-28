@@ -5,6 +5,12 @@ package com.smallow.android.news.entity;
  */
 public class ContentBean {
 
+    public ContentBean(Integer id,String title,String author){
+        this.id=id;
+        this.title=title;
+        this.author=author;
+    }
+
     private Integer id;
     private String title;
 
