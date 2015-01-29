@@ -20,37 +20,36 @@ package com.smallow.android.news;
  *******************************************************************************/
 
 
-        import java.util.ArrayList;
-        import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 
-        import android.annotation.SuppressLint;
-        import android.app.ListActivity;
-        import android.os.AsyncTask;
-        import android.os.Bundle;
-        import android.os.Handler;
-        import android.text.format.DateUtils;
-        import android.util.Log;
-        import android.view.ContextMenu;
-        import android.view.ContextMenu.ContextMenuInfo;
-        import android.view.Menu;
-        import android.view.MenuItem;
-        import android.view.View;
-        import android.view.ViewGroup;
-        import android.widget.AdapterView.AdapterContextMenuInfo;
-        import android.widget.BaseAdapter;
-        import android.widget.ListView;
-        import android.widget.TextView;
-        import android.widget.Toast;
+import android.annotation.SuppressLint;
+import android.app.ListActivity;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.text.format.DateUtils;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-        import com.handmark.pulltorefresh.library.PullToRefreshBase;
-        import com.handmark.pulltorefresh.library.PullToRefreshBase.Mode;
-        import com.handmark.pulltorefresh.library.PullToRefreshBase.OnLastItemVisibleListener;
-        import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
-        import com.handmark.pulltorefresh.library.PullToRefreshBase.State;
-        import com.handmark.pulltorefresh.library.PullToRefreshListView;
-        import com.handmark.pulltorefresh.library.extras.SoundPullEventListener;
-        import com.smallow.android.news.entity.ContentBean;
-
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.Mode;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnLastItemVisibleListener;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.State;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
+import com.handmark.pulltorefresh.library.extras.SoundPullEventListener;
+import com.smallow.android.news.GetNetJsonData.ItemAttri;
 
 /**
  * ①布局文件中使用PullToRefreshListView，findViewById
@@ -85,7 +84,7 @@ public final class PullToRefreshListActivity extends ListActivity {
     /** 更多的网络数据 **/
     private boolean isMore = true;
 
-    private List<ContentBean> mListData;// 存储网络数据
+    private List<ItemAttri> mListData;// 存储网络数据
 
     private PullToRefreshListView mPullRefreshListView;
     private ListViewAdapter mAdapter;// listView的适配器
@@ -93,7 +92,7 @@ public final class PullToRefreshListActivity extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       // setContentView(R.layout.activity_ptr_list);
+        setContentView(R.layout.news_category_layout);
 
         initView();
 
@@ -106,7 +105,7 @@ public final class PullToRefreshListActivity extends ListActivity {
         // registerForContextMenu(actualListView);
 
         // 获取首页数据并设置listView
-        mListData = new ArrayList<ContentBean>();
+        mListData = new ArrayList<GetNetJsonData.ItemAttri>();
         new GetDataTask().execute(FIRST_PAGE);
 
     }
@@ -154,7 +153,7 @@ public final class PullToRefreshListActivity extends ListActivity {
                                     .setReleaseLabel("松开自动刷新");
 
                             // 重置集合数据
-                            mListData = new ArrayList<ContentBean>();
+                            mListData = new ArrayList<ItemAttri>();
                             new GetDataTask().execute(FIRST_PAGE);
 
                             // 还原toPage初始值
@@ -221,8 +220,8 @@ public final class PullToRefreshListActivity extends ListActivity {
         @Override
         protected Void doInBackground(Integer... params) {
             // 本次请求的数据集合
-            List<ContentBean> currData = new ArrayList<ContentBean>();
-          //  currData = new GetNetJsonData().getDataFromJson(params[0]);
+            List<ItemAttri> currData = new ArrayList<ItemAttri>();
+            currData = new GetNetJsonData().getDataFromJson(params[0]);
             if (!currData.isEmpty()) {
                 // 有数据返回
                 // 数据加入集合中
@@ -307,9 +306,9 @@ public final class PullToRefreshListActivity extends ListActivity {
                 holder = (ViewHolder) convertView.getTag();
             }
 
-           // holder.tvTitle.setText(mListData.get(position).title);
-           /// holder.tvTime.setText(mListData.get(position).time);
-           // holder.tvContent.setText(mListData.get(position).content);
+            holder.tvTitle.setText(mListData.get(position).title);
+            holder.tvTime.setText(mListData.get(position).time);
+            holder.tvContent.setText(mListData.get(position).content);
 
             return convertView;
         }

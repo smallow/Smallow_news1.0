@@ -48,4 +48,11 @@ public abstract class InnerBaseAdapter<Data> extends BaseAdapter {
             notifyDataSetChanged();
         }
     }
+
+    public Data getData(int position) {
+        if (mData != null && position >= 0 && position < mData.size()) {
+            return mData.get(position);
+        }
+        return null;
+    }
 }

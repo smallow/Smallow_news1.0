@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.handmark.pulltorefresh.library.ILoadingLayout;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
+import com.smallow.android.news.GetNetJsonData;
 import com.smallow.android.news.R;
 import com.smallow.android.news.adapter.ListViewAdapter;
 import com.smallow.android.news.entity.ContentBean;
@@ -23,9 +24,7 @@ import com.smallow.android.news.entity.ContentBean;
 import java.util.ArrayList;
 
 import java.util.List;
-
-import java.util.Timer;
-import java.util.TimerTask;
+import com.smallow.android.news.GetNetJsonData.ItemAttri;
 
 /**
  * Created by smallow on 2015/1/22.
@@ -48,10 +47,10 @@ public class CategoryFragment extends BaseFragment {
      */
     private boolean isMore = true;
 
-    private List<ContentBean> mListData;// 存储网络数据
+    private List<GetNetJsonData.ItemAttri> mListData;// 存储网络数据
     private ListViewAdapter mAdapter;// listView的适配器
 
-    private List<ContentBean> remoteData = new ArrayList<ContentBean>();
+
 
     public CategoryFragment() {
 
@@ -64,19 +63,19 @@ public class CategoryFragment extends BaseFragment {
             title = bundle.getString("title");
             categoryCode = bundle.getString("categoryCode");
         }
-        makerData();
+
         return inflater.inflate(R.layout.news_category_layout, container, false);
     }
 
     @Override
     protected void onInitWidgets(View rootView, Bundle savedInstanceState) {
-        mListData = new ArrayList<ContentBean>();
+        mListData = new ArrayList<ItemAttri>();
         mPullRefreshListView = (PullToRefreshListView) findViewById(R.id.pull_refresh_list);
         mPullRefreshListView
                 .setMode(mPullRefreshListView.getMode() == PullToRefreshBase.Mode.BOTH ? PullToRefreshBase.Mode.PULL_FROM_START
                         : PullToRefreshBase.Mode.BOTH);
         initIndicator();
-        mAdapter = new ListViewAdapter(mListData, getActivity());
+        mAdapter = new ListViewAdapter(mListData);
         mPullRefreshListView.setAdapter(mAdapter);
         mPullRefreshListView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<ListView>() {
             @Override
@@ -91,6 +90,8 @@ public class CategoryFragment extends BaseFragment {
                 // 显示最后更新的时间
                 refreshView.getLoadingLayoutProxy()
                         .setLastUpdatedLabel(label);
+
+                mListData = new ArrayList<ItemAttri>();
                 new GetDataTask().execute(FIRST_PAGE);
                 // 还原toPage初始值
                 toPage = 1;
@@ -116,8 +117,19 @@ public class CategoryFragment extends BaseFragment {
                 new GetDataTask().execute(toPage);
             }
         });
-        // 获取首页数据并设置listView
 
+
+        mPullRefreshListView
+                .setOnLastItemVisibleListener(new PullToRefreshBase.OnLastItemVisibleListener() {
+                    @Override
+                    public void onLastItemVisible() {
+                        // listView最后一个item可见时触发
+                        /*Toast.makeText(getActivity(),
+                                "End of List!", Toast.LENGTH_SHORT).show();*/
+                    }
+                });
+
+        // 获取首页数据并设置listView
         new GetDataTask().execute(FIRST_PAGE);
     }
 
@@ -149,8 +161,8 @@ public class CategoryFragment extends BaseFragment {
         @Override
         protected Void doInBackground(Integer... params) {
             // 本次请求的数据集合
-            List<ContentBean> currData = new ArrayList<ContentBean>();
-            currData = remoteData;
+            List<GetNetJsonData.ItemAttri> currData = new ArrayList<GetNetJsonData.ItemAttri>();
+            currData = new GetNetJsonData().getDataFromJson(params[0]);
             if (!currData.isEmpty()) {
                 // 有数据返回
                 // 数据加入集合中
@@ -169,28 +181,14 @@ public class CategoryFragment extends BaseFragment {
 
         @Override
         protected void onPostExecute(Void v) {
-            mAdapter.notifyDataSetChanged();
-            Log.i(TAG, "page：" + toPage);
+           // Log.i(TAG, "mListDataSize：" + mListData.size());
+            mAdapter.notifyDataSetChanged(mListData);
+            //Log.i(TAG, "page：" + toPage);
             mPullRefreshListView.onRefreshComplete();// 完成刷新动作
             super.onPostExecute(v);
         }
     }
 
 
-    private void makerData() {
-        final Timer timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if(remoteData.size()<20){
-                    java.util.Random r=new java.util.Random();
-                    int num=1000 + r.nextInt(1000);
-                    remoteData.add(new ContentBean(num, "标题" + num, "作者" + num));
-                }else{
-                    timer.cancel();
-                }
 
-            }
-        }, 500, 1000);
-    }
 }
