@@ -10,4 +10,7 @@ public class SystemConst {
     public static final int SERVER_PORT = 8080;
     public static final String  SERVER_CONTEXT="";
 
+    public static String ENCRYPTO_KEY = "wmzhwllsrsfyxhxthbpjklmyljxzlnwh";
+    public static String VECTOR = "qweasdzxc2010111";
+
 }

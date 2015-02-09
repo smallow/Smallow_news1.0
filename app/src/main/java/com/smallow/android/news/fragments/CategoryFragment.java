@@ -19,18 +19,22 @@ import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.smallow.android.news.GetNetJsonData;
 import com.smallow.android.news.R;
 import com.smallow.android.news.adapter.ListViewAdapter;
+import com.smallow.android.news.common.DataLoadControler;
 import com.smallow.android.news.entity.ContentBean;
 
 import java.util.ArrayList;
 
 import java.util.List;
 import com.smallow.android.news.GetNetJsonData.ItemAttri;
+import com.smallow.android.news.utils.network.NetSpirit;
+import com.smallow.android.news.utils.network.RequestReceiver;
 
 /**
  * Created by smallow on 2015/1/22.
  */
-public class CategoryFragment extends BaseFragment {
-
+public class CategoryFragment extends BaseFragment implements DataLoadControler<GetNetJsonData.ItemAttri>{
+    private static final int req_type_refersh = 0;
+    private static final int req_type_load_more = 1;
     private String title;
     private String categoryCode;
     private PullToRefreshListView mPullRefreshListView;
@@ -130,7 +134,8 @@ public class CategoryFragment extends BaseFragment {
                 });
 
         // 获取首页数据并设置listView
-        new GetDataTask().execute(FIRST_PAGE);
+        //new GetDataTask().execute(FIRST_PAGE);
+        NetSpirit.getInstance().httpGet(getRefreshUrl(10),req_type_refersh,requestReceiver);
     }
 
 
@@ -156,7 +161,7 @@ public class CategoryFragment extends BaseFragment {
         }
     };
 
-    private class GetDataTask extends AsyncTask<Integer, Void, Void> {
+    /*private class GetDataTask extends AsyncTask<Integer, Void, Void> {
 
         @Override
         protected Void doInBackground(Integer... params) {
@@ -187,8 +192,41 @@ public class CategoryFragment extends BaseFragment {
             mPullRefreshListView.onRefreshComplete();// 完成刷新动作
             super.onPostExecute(v);
         }
+    }*/
+
+
+    @Override
+    public String getLoadMoreUrl(int pageNo, int perReqeustDataLenght) {
+        return null;
+    }
+
+    @Override
+    public String getRefreshUrl(int perReqeustDataLenght) {
+
+        return null;
+    }
+
+    @Override
+    public List<ItemAttri> handlerParseData(String rawResp) {
+        return null;
+    }
+
+    @Override
+    public String getMaxId(ItemAttri itemAttri) {
+        return null;
     }
 
 
+    private RequestReceiver requestReceiver = new RequestReceiver(){
+        @Override
+        public void onResult(int resultCode, int reqId, Object tag, String resp) {
+
+        }
+
+        @Override
+        public void onRequestCanceled(int reqId, Object tag) {
+
+        }
+    };
 
 }

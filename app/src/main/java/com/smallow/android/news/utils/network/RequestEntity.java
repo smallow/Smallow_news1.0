@@ -23,8 +23,8 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 
-import com.smallow.android.news.utils.network.ConnectionHelper.RequestMethod;
-import com.smallow.android.news.utils.network.ConnectionHelper.RequestReceiver;
+import com.smallow.android.news.utils.network.NetSpirit.RequestMethod;
+import com.smallow.android.news.utils.network.RequestReceiver;
 
 /**
  * 请求实例

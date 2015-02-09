@@ -65,7 +65,6 @@ import android.util.Log;
  *
  * @author sky
  */
-@SuppressLint("UseSparseArrays")
 public class ConnectionHelper {
     public static final String TAG = "ConnectionHelper";
     public static final boolean DEBUG = true;
@@ -101,6 +100,8 @@ public class ConnectionHelper {
                 443));
         ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager(
                 httpParams, reg);
+
+
         HttpConnectionParams.setConnectionTimeout(httpParams, CON_TIME_OUT_MS);
         HttpConnectionParams.setSoTimeout(httpParams, SO_TIME_OUT_MS);
 
@@ -112,9 +113,9 @@ public class ConnectionHelper {
     private static ConnectionHelper instance;
 
     public static synchronized ConnectionHelper obtainInstance() {
-        if (instance == null) {
-            instance = new ConnectionHelper();
-        }
+            if (instance == null) {
+                instance = new ConnectionHelper();
+            }
         return instance;
     }
 
@@ -139,13 +140,14 @@ public class ConnectionHelper {
 
     public long httpGet(String url, int requestId, String acceptEncoding,
                         RequestReceiver rr) {
-        RequestEntity entity = RequestEntity.obtain();
+        /*RequestEntity entity = RequestEntity.obtain();
         entity.setUrl(url);
         entity.setRequestReceiver(rr);
         entity.setAcceptEconding(acceptEncoding);
         entity.setMethod(RequestMethod.GET);
         entity.setRequestId(requestId);
-        return httpExecute(entity);
+        return httpExecute(entity);*/
+        return 0l;
     }
 
     public long httpPost(String url, int requestId,
@@ -165,13 +167,14 @@ public class ConnectionHelper {
      */
     public long httpPost(String url, int requestId,
                          List<NameValuePair> postValues, String charset, RequestReceiver rr) {
-        RequestEntity entity = RequestEntity.obtain();
+       /* RequestEntity entity = RequestEntity.obtain();
         entity.setUrl(url);
         entity.setRequestReceiver(rr);
         entity.setPostEntitiy(postValues, charset);
         entity.setMethod(RequestMethod.POST);
         entity.setRequestId(requestId);
-        return httpExecute(entity);
+        return httpExecute(entity);*/
+        return 0l;
     }
 
     public long httpPost(String url, int requestId, String queryString,
@@ -190,13 +193,14 @@ public class ConnectionHelper {
      */
     public long httpPost(String url, int requestId, String queryString,
                          String charset, RequestReceiver rr) {
-        RequestEntity entity = RequestEntity.obtain();
+       /* RequestEntity entity = RequestEntity.obtain();
         entity.setUrl(url);
         entity.setRequestReceiver(rr);
         entity.setPostEntitiy(queryString, charset);
         entity.setMethod(RequestMethod.POST);
         entity.setRequestId(requestId);
-        return httpExecute(entity);
+        return httpExecute(entity);*/
+        return 0l;
     }
 
     public long httpPost(String url, int requestId,
@@ -217,13 +221,14 @@ public class ConnectionHelper {
     public long httpPost(String url, int requestId,
                          List<NameValuePair> postValues, String charset,
                          Map<String, File> files, RequestReceiver rr) {
-        RequestEntity entity = RequestEntity.obtain();
+        /*RequestEntity entity = RequestEntity.obtain();
         entity.setUrl(url);
         entity.setRequestReceiver(rr);
         entity.setPostEntitiy(postValues, charset, files);
         entity.setMethod(RequestMethod.POST_WITH_FILE);
         entity.setRequestId(requestId);
-        return httpExecute(entity);
+        return httpExecute(entity);*/
+        return 0l;
     }
 
     private Map<Long, RequestEntity> mRequestRecords = new HashMap<Long, RequestEntity>();
@@ -334,7 +339,7 @@ public class ConnectionHelper {
             int customResultCode = RequestReceiver.RESULT_STATE_NETWORK_ERROR;
             int statusCode = -1;
             try {
-                if (rEntity.getMethod() == RequestMethod.GET) {
+                /*if (rEntity.getMethod() == RequestMethod.GET) {
                     httpRequest = new HttpGet(rEntity.getUrl());
                 } else {
                     // POST/POST_WITH_FILE
@@ -342,7 +347,7 @@ public class ConnectionHelper {
                     // 设置请求的数据
                     httpPost.setEntity(rEntity.getPostEntitiy());
                     httpRequest = httpPost;
-                }
+                }*/
                 HttpConnectionParams.setSoTimeout(httpRequest.getParams(),
                         CONNECTION_TIMEOUT);
                 String acceptEncoding = rEntity.getAcceptEconding();
@@ -380,12 +385,12 @@ public class ConnectionHelper {
             if (DEBUG) {
                 reportRequestEntity(rEntity, statusCode);
             }
-            RequestReceiver rr = rEntity.getRequestReceiver();
+            /*RequestReceiver rr = rEntity.getRequestReceiver();
             if (rr instanceof ParasiticRequestReceiver) {
                 ((ParasiticRequestReceiver) rr).parasiticHandler(
                         rEntity.getResultCode(), rEntity.getRequestId(),
                         rEntity.getTag(), rEntity.getRawResponse());
-            }
+            }*/
             synchronized (this) {
                 if (!isInterrupted) {
                     synchronized (rEntity) {
@@ -541,7 +546,7 @@ public class ConnectionHelper {
             // 分发结果给UI Thread
             if (msg != null && msg.obj instanceof RequestEntity) {
                 RequestEntity e = (RequestEntity) msg.obj;
-                if (mReqeustResultListener != null) {
+                /*if (mReqeustResultListener != null) {
                     mReqeustResultListener.onPerReqeustReturn(e,
                             ConnectionHelper.this);
                 }
@@ -554,7 +559,7 @@ public class ConnectionHelper {
                         rr.onResult(e.getResultCode(), e.getRequestId(),
                                 e.getTag(), e.getRawResponse());
                     }
-                }
+                }*/
                 //
                 e.recycle();
             }
