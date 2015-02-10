@@ -8,21 +8,22 @@ import android.widget.TextView;
 
 import com.smallow.android.news.GetNetJsonData.ItemAttri;
 import com.smallow.android.news.R;
+import com.smallow.android.news.entity.ContentBean;
 
 import java.util.List;
 
 /**
  * Created by smallow on 2015/1/28.
  */
-public class ListViewAdapter extends InnerBaseAdapter<ItemAttri> {
+public class ListViewAdapter extends InnerBaseAdapter<ContentBean> {
 
 
 
-    public ListViewAdapter(List<ItemAttri> data) {
+    public ListViewAdapter(List<ContentBean> data) {
         setData(data, false);
     }
 
-    public void notifyDataSetChanged(List<ItemAttri> data) {
+    public void notifyDataSetChanged(List<ContentBean> data) {
         setData(data,true);
     }
 
@@ -43,10 +44,10 @@ public class ListViewAdapter extends InnerBaseAdapter<ItemAttri> {
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-
-        holder.tvTitle.setText(getData(position).title);
-        holder.tvTime.setText(getData(position).time);
-        holder.tvContent.setText(getData(position).content);
+        ContentBean obj=getData(position);
+        holder.tvTitle.setText(obj.getTitle());
+        holder.tvTime.setText(obj.getPublishDate());
+        holder.tvContent.setText(obj.getContent());
         return convertView;
     }
 

@@ -13,4 +13,6 @@ public class SystemConst {
     public static String ENCRYPTO_KEY = "wmzhwllsrsfyxhxthbpjklmyljxzlnwh";
     public static String VECTOR = "qweasdzxc2010111";
 
+
+    public static String prefix_data = "http://172.16.18.147:8080/";
 }

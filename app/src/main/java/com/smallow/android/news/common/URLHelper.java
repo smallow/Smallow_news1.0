@@ -2,6 +2,7 @@ package com.smallow.android.news.common;
 
 import android.content.Context;
 
+import com.smallow.android.news.SystemConst;
 import com.smallow.android.news.utils.DeviceUtility;
 
 import java.net.URLEncoder;
@@ -14,7 +15,9 @@ public class URLHelper {
 
     public static final String DEMOURL = "http://jp-testdata.qiniudn.com/%40%2FlistDataPage.json?userId=%s&token=%s&startPosition=%s&length=%s";
 
-
+    private static final String getPrefix() {
+        return SystemConst.prefix_data;
+    }
 
 
 
