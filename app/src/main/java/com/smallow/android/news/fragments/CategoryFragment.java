@@ -71,6 +71,8 @@ public class CategoryFragment extends BaseFragment implements DataLoadControler<
         if (bundle != null) {
             title = bundle.getString("title");
             categoryCode = bundle.getString("categoryCode");
+        }else{
+            categoryCode="11";
         }
         return inflater.inflate(R.layout.news_category_layout, container, false);
     }
@@ -202,13 +204,13 @@ public class CategoryFragment extends BaseFragment implements DataLoadControler<
 
     @Override
     public String getLoadMoreUrl(int pageNo, int perReqeustDataLenght) {
-        String url= SystemConst.prefix_data+"GetContentList.do?order=4&pageSize="+perReqeustDataLenght+"&channelIds=11&pageNo="+pageNo;
+        String url= SystemConst.prefix_data+"GetContentList.do?order=4&pageSize="+perReqeustDataLenght+"&channelIds="+categoryCode+"&pageNo="+pageNo;
         return url;
     }
 
     @Override
     public String getRefreshUrl(int perReqeustDataLenght) {
-        String url=SystemConst.prefix_data+"GetContentList.do?order=4&pageSize="+perReqeustDataLenght+"&channelIds=11&pageNo=1";
+        String url=SystemConst.prefix_data+"GetContentList.do?order=4&pageSize="+perReqeustDataLenght+"&channelIds="+categoryCode+"&pageNo=1";
         return url;
     }
 

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="5dp"
-    android:background="@android:color/holo_orange_light">
+    >
 
 
     <TextView
@@ -13,10 +13,10 @@
         android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:text="要闻"
-        android:textColor="#ff4d9eff"
+        android:textColor="#ffffffff"
         android:textSize="14sp"
         android:layout_weight="1"
-        />
+        android:background="#fe4d9eff" />
 
     <TextView
         android:gravity="center"

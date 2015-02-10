@@ -14,5 +14,5 @@ public class SystemConst {
     public static String VECTOR = "qweasdzxc2010111";
 
 
-    public static String prefix_data = "http://172.16.18.147:8080/";
+    public static String prefix_data = "http://192.168.1.108:8080/";
 }
