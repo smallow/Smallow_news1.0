@@ -1,6 +1,7 @@
 package com.smallow.android.news.utils.network;
 
 
+import android.app.ProgressDialog;
 import android.net.ParseException;
 import android.os.Handler;
 import android.os.Message;
@@ -50,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -65,6 +67,9 @@ public class NetSpirit {
     public static final int MAX_CONNECTIONS_PER_HOST = 20;// SDK默认20
     public static final int CONNECTION_TIMEOUT = 20000;// ms
     public static final int READ_TIMEOUT = CONNECTION_TIMEOUT;
+
+
+
     private HttpClient httpClient;
 
 
@@ -492,6 +497,71 @@ public class NetSpirit {
             httpClient.getConnectionManager().shutdown();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+
+    public boolean cancleRequest(long reqFingerprint)
+            throws RequestEntityNotFoundException {
+        RequestEntity request = null;
+        synchronized (mRequestRecords) {
+            request = mRequestRecords.get(reqFingerprint);
+            if (request == null) {
+                throw new RequestEntityNotFoundException(reqFingerprint);
+            }
+            //
+            synchronized (request) {
+                if (request.isCanceled() && request.isCancelStateSend()) {
+                    return true;
+                }
+                Future<?> future = request.getRequestTaskFuture();
+                if (future == null) {
+                    return true;
+                }
+                request.setCanceled(true);
+                //
+                try {
+                    future.cancel(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return isReqeustRunning(reqFingerprint);
+                }
+                tryNotifyCanceled(request);
+            }
+        }
+        return true;
+    }
+
+
+    public class RequestEntityNotFoundException extends RuntimeException {
+        private static final long serialVersionUID = 3742290111879087686L;
+        private long reqFingerprint;
+
+        public RequestEntityNotFoundException(long reqFingerprint) {
+            this.reqFingerprint = reqFingerprint;
+        }
+
+        @Override
+        public String toString() {
+            return "RequestEntityNotFoundException reqFingerprint="
+                    + reqFingerprint + " reqeust entity not found";
+        }
+
+    }
+
+    /**
+     * 判断是否在运行
+     *
+     * @param reqFingerprint
+     * @return
+     */
+    public boolean isReqeustRunning(long reqFingerprint) {
+        synchronized (mRequestRecords) {
+            RequestEntity re = mRequestRecords.get(reqFingerprint);
+            if (re == null) {
+                return false;
+            }
+            return !re.isCanceled();
         }
     }
 }

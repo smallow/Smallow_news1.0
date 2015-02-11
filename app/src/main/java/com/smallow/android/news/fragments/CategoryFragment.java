@@ -1,9 +1,12 @@
 package com.smallow.android.news.fragments;
 
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,9 +43,11 @@ import com.smallow.android.news.utils.network.RequestReceiver;
 public class CategoryFragment extends BaseFragment implements DataLoadControler<GetNetJsonData.ItemAttri>{
     private static final int req_type_refersh = 0;
     private static final int req_type_load_more = 1;
-    private String title;
     private String categoryCode;
     private PullToRefreshListView mPullRefreshListView;
+    private ProgressDialog pd;// 对话框
+    private long lastRequestId;
+    private View contentView;
     /**
      * 首次网络请求页码
      */
@@ -58,32 +63,48 @@ public class CategoryFragment extends BaseFragment implements DataLoadControler<
 
     private List<ContentBean> mListData;// 存储网络数据
     private ListViewAdapter mAdapter;// listView的适配器
-
-
-
+    /** 标志位，标志已经初始化完成 */
+    private boolean isPrepared;
+    /** 是否已被加载过一次，第二次就不再去请求数据了 */
+    private boolean mHasLoadedOnce;
     public CategoryFragment() {
 
     }
+    public static CategoryFragment newInstance(String categoryCode) {
+        Bundle bundle = new Bundle();
+        bundle.putString("categoryCode", categoryCode);
+        CategoryFragment fragment = new CategoryFragment();
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        if(contentView==null){
+            contentView=inflater.inflate(R.layout.news_category_layout, container, false);
+            initPullToRefreshListView(contentView);
+            isPrepared = true;
+            lazyLoad();
+        }
         Bundle bundle = getArguments();
         if (bundle != null) {
-            title = bundle.getString("title");
             categoryCode = bundle.getString("categoryCode");
-        }else{
-            categoryCode="11";
         }
-        return inflater.inflate(R.layout.news_category_layout, container, false);
+        ViewGroup parent = (ViewGroup)contentView.getParent();
+        if(parent != null) {
+            parent.removeView(contentView);
+        }
+        return  contentView;
     }
 
-    @Override
-    protected void onInitWidgets(View rootView, Bundle savedInstanceState) {
+    private void initPullToRefreshListView(View contentView) {
         mListData = new ArrayList<ContentBean>();
-        mPullRefreshListView = (PullToRefreshListView) findViewById(R.id.pull_refresh_list);
-        mPullRefreshListView
-                .setMode(mPullRefreshListView.getMode() == PullToRefreshBase.Mode.BOTH ? PullToRefreshBase.Mode.PULL_FROM_START
-                        : PullToRefreshBase.Mode.BOTH);
+        mPullRefreshListView = (PullToRefreshListView) contentView.findViewById(R.id.pull_refresh_list);
+        mPullRefreshListView.setMode(mPullRefreshListView.getMode() == PullToRefreshBase.Mode.BOTH ? PullToRefreshBase.Mode.PULL_FROM_START
+                : PullToRefreshBase.Mode.BOTH);
         initIndicator();
         mAdapter = new ListViewAdapter(mListData);
         mPullRefreshListView.setAdapter(mAdapter);
@@ -100,7 +121,6 @@ public class CategoryFragment extends BaseFragment implements DataLoadControler<
                 // 显示最后更新的时间
                 refreshView.getLoadingLayoutProxy()
                         .setLastUpdatedLabel(label);
-
                 mListData = new ArrayList<ContentBean>();
                 //new GetDataTask().execute(FIRST_PAGE);
                 NetSpirit.getInstance().httpGet(getRefreshUrl(10),req_type_refersh,requestReceiver);
@@ -125,10 +145,9 @@ public class CategoryFragment extends BaseFragment implements DataLoadControler<
                             .setReleaseLabel("没有更多了...");
                 }
                 //new GetDataTask().execute(toPage);
-                NetSpirit.getInstance().httpGet(getLoadMoreUrl(toPage, 10),req_type_refersh,requestReceiver);
+                NetSpirit.getInstance().httpGet(getLoadMoreUrl(toPage, 10),req_type_load_more,requestReceiver);
             }
         });
-
 
         mPullRefreshListView
                 .setOnLastItemVisibleListener(new PullToRefreshBase.OnLastItemVisibleListener() {
@@ -139,10 +158,31 @@ public class CategoryFragment extends BaseFragment implements DataLoadControler<
                                 "End of List!", Toast.LENGTH_SHORT).show();*/
                     }
                 });
+    }
 
+
+    @Override
+    protected void lazyLoad() {
+        if (!isPrepared || !isVisible || mHasLoadedOnce) {
+            return;
+        }
         // 获取首页数据并设置listView
-        //new GetDataTask().execute(FIRST_PAGE);
-        NetSpirit.getInstance().httpGet(getRefreshUrl(10),req_type_refersh,requestReceiver);
+        pd=new ProgressDialog(getActivity());
+        pd.setMessage("正在获取数据请稍后...");
+        pd.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                pd.dismiss();
+                NetSpirit.getInstance().cancleRequest(lastRequestId);
+            }
+        });
+        pd.show();
+        lastRequestId=NetSpirit.getInstance().httpGet(getRefreshUrl(10),req_type_refersh,requestReceiver);
+        mHasLoadedOnce = true;
+    }
+
+    @Override
+    protected void onInitWidgets(View rootView, Bundle savedInstanceState) {
     }
 
 
@@ -164,7 +204,18 @@ public class CategoryFragment extends BaseFragment implements DataLoadControler<
      */
     private Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
-            Toast.makeText(getActivity(), "没有更多了", Toast.LENGTH_SHORT).show();
+            if(msg.what==RequestReceiver.RESULT_STATE_OK && msg.arg1==201){
+                Toast.makeText(getActivity(), "没有更多了", Toast.LENGTH_SHORT).show();
+            }else if(msg.what==RequestReceiver.RESULT_STATE_TIME_OUT){
+                Toast.makeText(getActivity(), "系统繁忙,请稍后重试", Toast.LENGTH_SHORT).show();
+            }else if(msg.what==RequestReceiver.RESULT_STATE_NETWORK_ERROR){
+                Toast.makeText(getActivity(), "网络出现异常,请稍后重试", Toast.LENGTH_SHORT).show();
+            }else if(msg.what==RequestReceiver.RESULT_STATE_SERVER_ERROR){
+                Toast.makeText(getActivity(), "系统故障,请稍后重试", Toast.LENGTH_SHORT).show();
+            }
+            if(pd!=null && pd.isShowing()){
+                pd.dismiss();
+            }
         }
     };
 
@@ -210,7 +261,7 @@ public class CategoryFragment extends BaseFragment implements DataLoadControler<
 
     @Override
     public String getRefreshUrl(int perReqeustDataLenght) {
-        String url=SystemConst.prefix_data+"GetContentList.do?order=4&pageSize="+perReqeustDataLenght+"&channelIds="+categoryCode+"&pageNo=1";
+        String url=SystemConst.prefix_data+"GetContentList.do?order=4&pageSize="+perReqeustDataLenght+"&channelIds="+categoryCode+"&pageNo="+FIRST_PAGE;
         return url;
     }
 
@@ -228,44 +279,59 @@ public class CategoryFragment extends BaseFragment implements DataLoadControler<
     private RequestReceiver requestReceiver = new RequestReceiver(){
         @Override
         public void onResult(int resultCode, int reqId, Object tag, String resp) {
-            List<ContentBean> currData = new ArrayList<ContentBean>();
-            if(resp!=null && !resp.equals("")){
-                JSONObject map= (JSONObject)JSON.parse(resp);
+            Message m = mHandler.obtainMessage();
+            switch (resultCode){
+                case RESULT_STATE_OK:
+                    List<ContentBean> currData = new ArrayList<ContentBean>();
+                    if(resp!=null && !resp.equals("")){
+                        JSONObject map= (JSONObject)JSON.parse(resp);
 
-                JSONArray array=map.getJSONArray("list");
-                int maxPageNum=map.getInteger("totalPage");
+                        JSONArray array=map.getJSONArray("list");
+                        int maxPageNum=map.getInteger("totalPage");
 
-                if(toPage<=maxPageNum){
-                    for (int i=0;i<array.size();i++) {
-                        JSONObject jsonObj = (JSONObject) array.getJSONObject(i);
-                        currData.add(new ContentBean(jsonObj.getInteger("id"),
-                                jsonObj.getString("title"),
-                                jsonObj.getString("author"),
-                                jsonObj.getString("publishDate"),
-                                jsonObj.getString("content")
-                        ));
+                        if(toPage<=maxPageNum){
+                            for (int i=0;i<array.size();i++) {
+                                JSONObject jsonObj = (JSONObject) array.getJSONObject(i);
+                                currData.add(new ContentBean(jsonObj.getInteger("id"),
+                                        jsonObj.getString("title"),
+                                        jsonObj.getString("author"),
+                                        jsonObj.getString("publishDate"),
+                                        jsonObj.getString("content")
+                                ));
+                            }
+                        }
+
                     }
-                }
+                    if (!currData.isEmpty()) {
+                        // 有数据返回
+                        // 数据加入集合中
+                        mListData.addAll(currData);
+                    } else {
+                        // 没有数据
+                        isMore = false;
+                        // 向主线程发送通知
+                        m.arg1=201;
+                        mHandler.sendEmptyMessage(0);
+                        // 没有数据toPage--
+                        toPage--;
+                    }
 
+                    mAdapter.notifyDataSetChanged(mListData);
+                    //Log.i(TAG, "page：" + toPage);
+
+                    m.what=RESULT_STATE_OK;
+                    break;
+                case RESULT_STATE_SERVER_ERROR:
+                    m.what=RESULT_STATE_SERVER_ERROR;
+                    break;
+                case RESULT_STATE_NETWORK_ERROR:
+                    m.what=RESULT_STATE_NETWORK_ERROR;
+                    break;
+                case RESULT_STATE_TIME_OUT:
+                    m.what=RESULT_STATE_TIME_OUT;
             }
-
-
-            if (!currData.isEmpty()) {
-                // 有数据返回
-                // 数据加入集合中
-                mListData.addAll(currData);
-            } else {
-                // 没有数据
-                isMore = false;
-                // 向主线程发送通知
-                mHandler.sendEmptyMessage(0);
-                // 没有数据toPage--
-                toPage--;
-            }
-
-            mAdapter.notifyDataSetChanged(mListData);
-            //Log.i(TAG, "page：" + toPage);
             mPullRefreshListView.onRefreshComplete();// 完成刷新动作
+            mHandler.sendMessage(m);
         }
 
         @Override

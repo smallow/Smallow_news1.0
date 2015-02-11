@@ -7,12 +7,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.smallow.android.news.R;
+import com.smallow.android.news.adapter.ListFragmentPagerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,23 +34,30 @@ public class NewsFragment extends BaseFragment {
     @Override
     protected void onInitWidgets(View rootView, Bundle savedInstanceState) {
         initFragments();
-        viewPager = findViewById(R.id.news_viewPager);
-        fragmentPagerAdapter = new FragmentPagerAdapter(getChildFragmentManager()) {
-            @Override
-            public Fragment getItem(int i) {
-                return fragmentList.get(i);
-            }
+        initViewPager();
+    }
 
-            @Override
-            public int getCount() {
-                return fragmentList.size();
-            }
-        };
+    private void initFragments() {
+        fragmentList = new ArrayList<Fragment>();
+        CategoryFragment categoryFragment1 =CategoryFragment.newInstance("11");
+        CategoryFragment categoryFragment2 =CategoryFragment.newInstance("41");
+        CategoryFragment categoryFragment3 =CategoryFragment.newInstance("14");
+        CategoryFragment categoryFragment4 =CategoryFragment.newInstance("71");
+        CategoryFragment categoryFragment5 =CategoryFragment.newInstance("70");
+        fragmentList.add(categoryFragment1);
+        fragmentList.add(categoryFragment2);
+        fragmentList.add(categoryFragment3);
+        fragmentList.add(categoryFragment4);
+        fragmentList.add(categoryFragment5);
+    }
+    private void initViewPager() {
+        viewPager = findViewById(R.id.news_viewPager);
+        viewPager.setOffscreenPageLimit(1);
+        fragmentPagerAdapter = new ListFragmentPagerAdapter(getChildFragmentManager(),fragmentList);
         viewPager.setAdapter(fragmentPagerAdapter);
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int i, float v, int i2) {
-
             }
 
             @Override
@@ -60,7 +69,6 @@ public class NewsFragment extends BaseFragment {
 
             @Override
             public void onPageScrollStateChanged(int i) {
-
             }
         });
     }
@@ -72,46 +80,8 @@ public class NewsFragment extends BaseFragment {
         }
     }
 
-    private void initFragments() {
-        fragmentList = new ArrayList<Fragment>();
-        CategoryFragment categoryFragment1 = new CategoryFragment();
-        Bundle bundle1 = new Bundle();
-        bundle1.putString("title", "重要新闻");
-        bundle1.putString("categoryCode", "11");
-        categoryFragment1.setArguments(bundle1);
 
-        CategoryFragment categoryFragment2 = new CategoryFragment();
-        Bundle bundle2 = new Bundle();
-        bundle2.putString("title", "财经新闻");
-        bundle2.putString("categoryCode", "41");
-        categoryFragment2.setArguments(bundle2);
-
-
-        CategoryFragment categoryFragment3 = new CategoryFragment();
-        Bundle bundle3 = new Bundle();
-        bundle3.putString("title", "体育新闻");
-        bundle3.putString("categoryCode", "14");
-        categoryFragment3.setArguments(bundle3);
-
-
-        CategoryFragment categoryFragment4 = new CategoryFragment();
-        Bundle bundle4 = new Bundle();
-        bundle4.putString("title", "科技新闻");
-        bundle4.putString("categoryCode", "71");
-        categoryFragment4.setArguments(bundle4);
-
-
-        CategoryFragment categoryFragment5 = new CategoryFragment();
-        Bundle bundle5 = new Bundle();
-        bundle5.putString("title", "娱乐新闻");
-        bundle5.putString("categoryCode", "70");
-        categoryFragment5.setArguments(bundle5);
-        fragmentList.add(categoryFragment1);
-        fragmentList.add(categoryFragment2);
-        fragmentList.add(categoryFragment3);
-        fragmentList.add(categoryFragment4);
-        fragmentList.add(categoryFragment5);
-
-
+    @Override
+    protected void lazyLoad() {
     }
 }
