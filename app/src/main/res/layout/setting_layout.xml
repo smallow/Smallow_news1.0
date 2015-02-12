@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="服务器IP："
+            android:id="@+id/tv_serverIp"
+            android:textSize="18sp"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/et_serverIp" />
+
+        <EditText
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/et_serverIp"
+            android:layout_alignParentRight="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="端口："
+            android:id="@+id/tv_serverPort"
+            android:textSize="18sp"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/et_serverPort" />
+
+        <EditText
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/et_serverPort"
+            android:layout_alignParentRight="true" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="测试连接"
+            android:id="@+id/connectionTest"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="50dp"
+            />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="保存设置"
+            android:id="@+id/saveSetting"
+            android:layout_centerVertical="true"
+             android:layout_alignParentRight="true"
+            android:layout_marginRight="50dp"
+            />
+    </RelativeLayout>
+</LinearLayout>

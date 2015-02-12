@@ -9,6 +9,7 @@ import android.view.Window;
 import android.widget.Button;
 
 import com.smallow.android.news.fragments.NewsFragment;
+import com.smallow.android.news.fragments.SettingFragment;
 
 /**
  * 主程序入口
@@ -23,6 +24,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private Button btnSetting;
 
     private NewsFragment newsFragment;
+    private SettingFragment settingFragment;
 
 
     @Override
@@ -66,6 +68,12 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             case 2:
                 break;
             case 3:
+                if(settingFragment==null){
+                    settingFragment=new SettingFragment();
+                    transaction.add(R.id.id_content,settingFragment);
+                }else{
+                    transaction.show(settingFragment);
+                }
                 break;
         }
 
@@ -75,6 +83,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private void hiddenFragments(FragmentTransaction transaction) {
         if (newsFragment != null) {
             transaction.hide(newsFragment);
+        }
+        if (settingFragment != null) {
+            transaction.hide(settingFragment);
         }
     }
 

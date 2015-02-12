@@ -83,16 +83,17 @@ public class CategoryFragment extends BaseFragment implements DataLoadControler<
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            categoryCode = bundle.getString("categoryCode");
+        }
         if(contentView==null){
             contentView=inflater.inflate(R.layout.news_category_layout, container, false);
             initPullToRefreshListView(contentView);
             isPrepared = true;
             lazyLoad();
         }
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            categoryCode = bundle.getString("categoryCode");
-        }
+
         ViewGroup parent = (ViewGroup)contentView.getParent();
         if(parent != null) {
             parent.removeView(contentView);

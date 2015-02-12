@@ -38,8 +38,6 @@
         <activity
             android:name=".PullToRefreshListActivity"
             />
-
-
     </application>
 
 </manifest>

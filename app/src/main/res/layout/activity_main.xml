@@ -7,7 +7,7 @@
     <include
         android:id="@+id/id_smallow_bottombar"
         android:layout_width="fill_parent"
-        android:layout_height="55dp"
+        android:layout_height="45dp"
         android:layout_alignParentBottom="true"
         layout="@layout/layout_bottom_bar" />
 
