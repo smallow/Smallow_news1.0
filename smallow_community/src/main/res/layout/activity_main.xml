@@ -1,0 +1,21 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:cumstom="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.smallow.community.ui.CommonTitleBar
+        android:id="@+id/titleBar1"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#F14E41"
+        android:padding="10dp"
+        cumstom:titleText="优惠多"
+        cumstom:titleColor="@android:color/white"
+        cumstom:titleTextSize="16sp"
+        cumstom:rightImgSrc="@drawable/nav_menu"
+        />
+
+
+</LinearLayout>
