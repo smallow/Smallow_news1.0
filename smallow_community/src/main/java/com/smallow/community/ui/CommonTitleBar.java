@@ -57,16 +57,16 @@ public class CommonTitleBar extends RelativeLayout {
 
         TypedArray typedArray=context.obtainStyledAttributes(attrs, R.styleable.CommonTitleBar);
         title=typedArray.getString(R.styleable.CommonTitleBar_titleText);
-        titleSize=typedArray.getDimension(R.styleable.CommonTitleBar_titleTextSize, 0);
+        titleSize=typedArray.getDimension(R.styleable.CommonTitleBar_titleTextSize, 16);
         titleColor=typedArray.getColor(R.styleable.CommonTitleBar_titleColor, Color.WHITE);
         leftImgSrc=typedArray.getDrawable(R.styleable.CommonTitleBar_leftImgSrc);
         leftTvText=typedArray.getString(R.styleable.CommonTitleBar_leftTvText);
-        leftTvSize=typedArray.getDimension(R.styleable.CommonTitleBar_leftTvTextSize, 0);
+        leftTvSize=typedArray.getDimension(R.styleable.CommonTitleBar_leftTvTextSize, 16);
         leftTvColor=typedArray.getColor(R.styleable.CommonTitleBar_leftTvTextColor, Color.WHITE);
 
         rightImgSrc=typedArray.getDrawable(R.styleable.CommonTitleBar_rightImgSrc);
         rightTvText=typedArray.getString(R.styleable.CommonTitleBar_rightTvText);
-        rightTvSize=typedArray.getDimension(R.styleable.CommonTitleBar_rightTvTextSize, 0);
+        rightTvSize=typedArray.getDimension(R.styleable.CommonTitleBar_rightTvTextSize, 16);
         rightTvColor=typedArray.getColor(R.styleable.CommonTitleBar_rightTvTextColor, Color.WHITE);
 
 
@@ -116,7 +116,7 @@ public class CommonTitleBar extends RelativeLayout {
 
 
 
-        titleParams=new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.MATCH_PARENT);
+        titleParams=new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
         titleParams.addRule(RelativeLayout.CENTER_IN_PARENT);
         titleParams.addRule(RelativeLayout.CENTER_VERTICAL);
         addView(tvTitle, titleParams);
@@ -125,7 +125,7 @@ public class CommonTitleBar extends RelativeLayout {
         leftImgParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
         addView(leftImg,leftImgParams);
 
-        leftTextParams=new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.MATCH_PARENT);
+        leftTextParams=new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
         leftTextParams.addRule(RelativeLayout.RIGHT_OF,11);
         leftTextParams.addRule(RelativeLayout.CENTER_VERTICAL);
         addView(leftTv,leftTextParams);
@@ -136,7 +136,7 @@ public class CommonTitleBar extends RelativeLayout {
         if(rightImg!=null)
             addView(rightImg,rightImgParams);
 
-        rightTextParams=new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.MATCH_PARENT);
+        rightTextParams=new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
         rightTextParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
         if(rightTv!=null)
             addView(rightTv,rightTextParams);

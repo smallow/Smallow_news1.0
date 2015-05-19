@@ -13,7 +13,6 @@
         android:padding="10dp"
         cumstom:titleText="优惠多"
         cumstom:titleColor="@android:color/white"
-        cumstom:titleTextSize="16sp"
         cumstom:rightImgSrc="@drawable/nav_menu"
         />
 

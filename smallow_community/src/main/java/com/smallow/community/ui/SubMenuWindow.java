@@ -28,7 +28,7 @@ public class SubMenuWindow extends PopupWindow {
     private ListView listview;
     private MenuAdapter mAdapter = new MenuAdapter();
     private int belowYInterval = 1;
-    private int rightXOffset = 8;
+    private int rightXOffset = 1;
 
     public SubMenuWindow(Context context) {
         super(context);
