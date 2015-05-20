@@ -13,8 +13,41 @@
         android:padding="10dp"
         cumstom:titleText="优惠多"
         cumstom:titleColor="@android:color/white"
-        cumstom:rightImgSrc="@drawable/nav_menu"
+        cumstom:rightImgSrc="@drawable/nav_menu" />
+
+    <com.smallow.community.ui.CommonSearchInput
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:layout_margin="5dp"
+        android:orientation="horizontal"
+        android:background="@drawable/shape_corner"
+        cumstom:leftImgSrc1="@drawable/ic_search_contact"
+
         />
 
+    <com.handmark.pulltorefresh.library.PullToRefreshScrollView xmlns:ptr="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/pull_refresh_scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        ptr:ptrAnimationStyle="flip"
+        ptr:ptrMode="both">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:orientation="vertical">
+
+            <com.smallow.community.ui.SlideShowView
+                android:layout_width="match_parent"
+                android:layout_height="180dp" />
+
+            <ListView
+                android:id="@+id/contentListView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+            </ListView>
+        </LinearLayout>
+
+
+    </com.handmark.pulltorefresh.library.PullToRefreshScrollView>
 </LinearLayout>

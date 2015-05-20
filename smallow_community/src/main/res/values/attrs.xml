@@ -9,14 +9,16 @@
         <attr name="leftTvText" format="string"/>
         <attr name="leftTvTextColor" format="color"/>
         <attr name="leftTvTextSize" format="dimension"/>
-
         <attr name="rightImgSrc" format="reference" />
         <attr name="rightTvText" format="string"/>
         <attr name="rightTvTextColor" format="color"/>
         <attr name="rightTvTextSize" format="dimension"/>
+    </declare-styleable>
 
-
-
-
+    <declare-styleable name="CommonSearchInput">
+        <attr name="leftImgSrc1" format="reference"/>
+        <attr name="defaultText" format="string"/>
+        <attr name="defaultTextColor" format="color"/>
+        <attr name="defaultTextSize" format="dimension"/>
     </declare-styleable>
 </resources>
