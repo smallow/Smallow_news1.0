@@ -1,0 +1,8 @@
+package com.smallow.common.network;
+
+/**
+ * Created by smallow on 2015/1/26.
+ */
+public interface ReqeustResultListener {
+    public boolean onPerReqeustReturn(RequestEntity en, NetSpirit conn);
+}

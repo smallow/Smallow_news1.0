@@ -9,7 +9,16 @@ public class Content  {
     private Integer id;
     private String titleImg;
     private String description;
+    private String money;
 
+
+    public Content(Integer id,String title,String description,String money,String titleImg){
+        this.id=id;
+        this.title=title;
+        this.titleImg=titleImg;
+        this.description=description;
+        this.money=money;
+    }
 
 
     public String getTitle() {
@@ -43,4 +52,13 @@ public class Content  {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public String getMoney() {
+        return money;
+    }
+
+    public void setMoney(String money) {
+        this.money = money;
+    }
 }
+
