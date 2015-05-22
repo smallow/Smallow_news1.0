@@ -1,2 +1,2 @@
-include ':app', ':smallow_community'
+include ':app', ':smallow_community', ':smallow_common'
 include ':library'

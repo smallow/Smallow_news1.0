@@ -3,6 +3,9 @@ package com.smallow.community;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -17,6 +20,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshScrollView;
+import com.smallow.common.AsyncImageLoader;
 import com.smallow.common.DataLoadControler;
 import com.smallow.common.network.NetSpirit;
 import com.smallow.common.network.RequestReceiver;
@@ -30,8 +34,7 @@ import com.smallow.community.ui.SlideShowView;
 import com.smallow.community.ui.SubMenuWindow;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 
 
 public class MainActivity extends Activity  implements DataLoadControler<Content>{
@@ -41,19 +44,39 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
     ScrollView mScrollView;
     private List<Content> mListData;// 存储网络数据
     private ContentListViewAdapter mAdapter;
-    ExecutorService executorService;
+
+
+    /**首次网络请求页码*/
+    private static final int FIRST_PAGE = 1;
+    /**数据请求页码*/
+    private int toPage = 1;
+    /*** 更多的网络数据 **/
+    private boolean isMore = true;
+    /** 标志位，标志已经初始化完成 */
+    private boolean isPrepared;
+    /** 是否已被加载过一次，第二次就不再去请求数据了 */
+    private boolean mHasLoadedOnce;
+    private long lastRequestId;
+    private static final int req_type_refersh = 0;
+    private static final int req_type_load_more = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        executorService = Executors.newFixedThreadPool(5);
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         initCommonTitleBar();
         initContentListView();
         initPullToRefreshScrollView();
+        lazyLoad();
     }
 
 
+
+    /**
+     * 初始化一般顶部导航栏
+     */
     private void initCommonTitleBar(){
         initSubMenuData();
         final CommonTitleBar bar1= (CommonTitleBar) findViewById(R.id.titleBar1);
@@ -70,32 +93,74 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
             }
         });
     }
+    private void initContentListView() {
+        contentListView= (ListView) findViewById(R.id.contentListView);
+        mListData=new ArrayList<Content>();
+        //contentListView.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,getData()));
+        mAdapter=new ContentListViewAdapter(mListData,MainActivity.this);
+        contentListView.setAdapter(mAdapter);
+        setListViewHeightBasedOnChildren(contentListView);
+    }
 
 
     private void initPullToRefreshScrollView(){
         mPullRefreshScrollView = (PullToRefreshScrollView) findViewById(R.id.pull_refresh_scrollview);
-        mPullRefreshScrollView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<ScrollView>() {
+        mPullRefreshScrollView.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<ScrollView>() {
             @Override
-            public void onRefresh(PullToRefreshBase<ScrollView> refreshView) {
-                NetSpirit.getInstance().httpGet(getRefreshUrl(10), Api.getTop10MerchantContentRid,getTop10MerchantContentReceiver);
+            public void onPullDownToRefresh(PullToRefreshBase<ScrollView> refreshView) {
+                /** 下拉刷新*/
+                String label = DateUtils.formatDateTime(MainActivity.this,
+                        System.currentTimeMillis(),
+                        DateUtils.FORMAT_SHOW_TIME
+                                | DateUtils.FORMAT_SHOW_DATE
+                                | DateUtils.FORMAT_ABBREV_ALL);
+                // 显示最后更新的时间
+                refreshView.getLoadingLayoutProxy()
+                        .setLastUpdatedLabel(label);
+                mListData = new ArrayList<Content>();
+                NetSpirit.getInstance().httpGet(getRefreshUrl(10), req_type_refersh,requestReceiver);
+                // 还原toPage初始值
+                toPage = 1;
+                // 还原上拉加载控制变量
+                isMore = true;
+            }
+
+            @Override
+            public void onPullUpToRefresh(PullToRefreshBase<ScrollView> refreshView) {
+                /** 上拉加载分页*/
+                toPage++;
+                if (!isMore) {
+                    // 上一次请求已经没有数据了
+                    mPullRefreshScrollView.getLoadingLayoutProxy()
+                            .setPullLabel("没有更多了...");
+                    mPullRefreshScrollView.getLoadingLayoutProxy()
+                            .setRefreshingLabel("没有更多了...");
+                    mPullRefreshScrollView.getLoadingLayoutProxy()
+                            .setReleaseLabel("没有更多了...");
+                }
+                NetSpirit.getInstance().httpGet(getLoadMoreUrl(toPage, 10),req_type_load_more,requestReceiver);
             }
         });
         mScrollView = mPullRefreshScrollView.getRefreshableView();
+        isPrepared = true;
+    }
+
+    private void lazyLoad() {
+        if (!isPrepared  || mHasLoadedOnce) {
+            return;
+        }
+        lastRequestId=NetSpirit.getInstance().httpGet(getRefreshUrl(10), req_type_refersh,requestReceiver);
+
+        mHasLoadedOnce = true;
+
     }
 
 
 
-
-
-
-
-
-
-
-
-    private RequestReceiver getTop10MerchantContentReceiver = new RequestReceiver(){
+    private RequestReceiver requestReceiver = new RequestReceiver(){
         @Override
         public void onResult(int resultCode, int reqId, Object tag, String resp) {
+            Message m = mHandler.obtainMessage();
             List<Content> currData=new ArrayList<Content>();
             if(resp!=null && !"".equals(resp)){
                 JSONArray array= JSON.parseArray(resp);
@@ -103,11 +168,6 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
                     JSONObject jsonObj = (JSONObject) array.getJSONObject(i);
                     JSONObject _jsonObj=jsonObj.getJSONObject("merchant");
                     currData.add(new Content(jsonObj.getInteger("id"),_jsonObj.getString("name"), StrUtils.textCut(jsonObj.getString("title"), 35, "..."),String.valueOf(jsonObj.getFloat("concessionalPrice")),jsonObj.getString("titleImg")));
-                    if(jsonObj.getString("titleImg")!=null){
-                        queueDownLoadPic(jsonObj.getString("titleImg"));
-                    }
-
-
                 }
             }
             if (!currData.isEmpty()) {
@@ -116,17 +176,45 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
                 mListData.addAll(currData);
             } else {
                 // 没有数据
-                //isMore = false;
+                isMore = false;
                 // 向主线程发送通知
-               // m.arg1=201;
-               // mHandler.sendEmptyMessage(0);
+                m.arg1=201;
+                mHandler.sendEmptyMessage(0);
                 // 没有数据toPage--
-                //toPage--;
+                toPage--;
             }
-
             mAdapter.notifyDataSetChanged(mListData);
             setListViewHeightBasedOnChildren(contentListView);
             mPullRefreshScrollView.onRefreshComplete();
+            mHandler.sendMessage(m);
+            NetSpirit.getInstance().httpGet(getRefreshUrl(5),req_type_refersh,slidShowViewRequestReceiver);
+        }
+
+        @Override
+        public void onRequestCanceled(int reqId, Object tag) {
+
+        }
+    };
+
+
+    private RequestReceiver slidShowViewRequestReceiver=new RequestReceiver() {
+        @Override
+        public void onResult(int resultCode, int reqId, Object tag, String resp) {
+            List<Content> currData=new ArrayList<Content>();
+            String[] titleImgs=new String[5];
+            if(resp!=null && !"".equals(resp)){
+                JSONArray array= JSON.parseArray(resp);
+                for (int i=0;i<array.size();i++) {
+                    JSONObject jsonObj = (JSONObject) array.getJSONObject(i);
+                    JSONObject _jsonObj=jsonObj.getJSONObject("merchant");
+                    currData.add(new Content(jsonObj.getInteger("id"),_jsonObj.getString("name"), StrUtils.textCut(jsonObj.getString("title"), 35, "..."),String.valueOf(jsonObj.getFloat("concessionalPrice")),jsonObj.getString("titleImg")));
+                    titleImgs[i]=jsonObj.getString("titleImg");
+                }
+            }
+            SlideShowView slideShowView= (SlideShowView) findViewById(R.id.slideShowView);
+            slideShowView.notifyDataSetChanged(titleImgs);
+
+
         }
 
         @Override
@@ -138,32 +226,26 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
 
     @Override
     public String getRefreshUrl(int perReqeustDataLenght) {
-        String url=Api.conParam+Api.getTop10MerchantContent;
+        String url=Api.conParam+Api.getTop10MerchantContent+"?page="+FIRST_PAGE+"&pageSize="+perReqeustDataLenght;
         return url;
     }
 
     @Override
     public String getLoadMoreUrl(int pageNo, int perReqeustDataLenght) {
-        return null;
+        String url=Api.conParam+Api.getTop10MerchantContent+"?page="+pageNo+"&pageSize="+perReqeustDataLenght;
+        return url;
     }
 
 
 
-    private void initContentListView() {
-        contentListView= (ListView) findViewById(R.id.contentListView);
-        mListData=new ArrayList<Content>();
-        //contentListView.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,getData()));
-        mAdapter=new ContentListViewAdapter(mListData,MainActivity.this);
-        contentListView.setAdapter(mAdapter);
-        setListViewHeightBasedOnChildren(contentListView);
-    }
+
 
 
 
     private void initSubMenuData(){
-        subMenuData.add(new MainSubMenuData("功能1"));
-        subMenuData.add(new MainSubMenuData("功能2"));
-        subMenuData.add(new MainSubMenuData("功能3"));
+        subMenuData.add(new MainSubMenuData("登录"));
+        subMenuData.add(new MainSubMenuData("注册"));
+        subMenuData.add(new MainSubMenuData("查看订单"));
     }
 
 
@@ -207,65 +289,10 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
     }
 
 
-
-    private void queueDownLoadPic(String titleImg)
-    {
-        TitleImgToDown titleImgDownTask=new TitleImgToDown(titleImg);
-        executorService.submit(new TitleImgDownLoader(titleImgDownTask));
-    }
-
-    private class TitleImgToDown{
-        public String url;
-
-        private TitleImgToDown(String url) {
-            this.url = url;
-        }
-    }
-
-
-    private class TitleImgDownLoader implements Runnable{
-        TitleImgToDown titleImgDownTask;
-        TitleImgDownLoader(TitleImgToDown titleImgDownTask) {
-            this.titleImgDownTask=titleImgDownTask;
-        }
-
+    private Handler mHandler=new Handler(){
         @Override
-        public void run() {
+        public void handleMessage(Message msg) {
 
         }
-    }
-
-    /*private class GetDataTask extends AsyncTask<Void, Void, String[]> {
-
-        @Override
-        protected String[] doInBackground(Void... params) {
-            // Simulates a background job.
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String[] result) {
-
-            Content bean1=new Content();
-            bean1.setTitle("宝贝计划孕婴生活馆");
-            bean1.setDescription("3M贝亲150ML奶瓶98,送原装奶嘴2个");
-            bean1.setMoney("97");
-            mListData.add(bean1);
-            mAdapter.notifyDataSetChanged(mListData);
-            mPullRefreshScrollView.onRefreshComplete();
-            super.onPostExecute(result);
-        }
-    }*/
-
-    /*private List<String> getData(){
-        List<String> data = new ArrayList<String>();
-        for(int i=1;i<100;i++){
-            data.add("数据"+i);
-        }
-        return data;
-    }*/
+    };
 }

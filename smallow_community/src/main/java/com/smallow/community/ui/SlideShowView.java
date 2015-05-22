@@ -1,6 +1,8 @@
 package com.smallow.community.ui;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -8,8 +10,10 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.smallow.common.AsyncImageLoader;
 import com.smallow.community.R;
 import com.smallow.community.adapter.ViewPagerAdpter;
+import com.smallow.community.api.Api;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,8 +56,15 @@ public  class SlideShowView extends FrameLayout implements ViewPager.OnPageChang
     private int currentItem = 0;
     private ViewPagerAdpter adpter;
 
+    private Context context;
+
+
+    // 异步加载图片的线程
+    private AsyncImageLoader asyncImageLoader = new AsyncImageLoader();
+
     public SlideShowView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        context=context;
         initData();
         initView(context);
     }
@@ -82,6 +93,7 @@ public  class SlideShowView extends FrameLayout implements ViewPager.OnPageChang
         viewPager.setFocusable(true);
         viewPager.setAdapter(adpter);
         viewPager.setOnPageChangeListener(this);
+
     }
 
     public  void initData(){
@@ -93,6 +105,36 @@ public  class SlideShowView extends FrameLayout implements ViewPager.OnPageChang
                 R.drawable.pic5,
         };
     }
+
+    public void notifyDataSetChanged(String [] titleImgs){
+        if(titleImgs!=null && titleImgs.length>0){
+            imageViewsList.clear();
+            adpter.notifyDataSetChanged();
+            for(String titleImgUrl:titleImgs){
+                ImageView imageView=new ImageView(getContext());
+                imageViewsList.add(imageView);
+                titleImgUrl=titleImgUrl.substring(1,titleImgUrl.length());
+                asyncImageLoader.loadDrawable(Api.conParam+titleImgUrl,imageView,new AsyncImageLoader.ImageCallback() {
+                    @Override
+                    public void imageLoaded(Drawable imageDrawable, ImageView imageView, String imageUrl) {
+                        System.out.println("图片:"+imageUrl+" 下载好的Drawble:"+imageDrawable);
+                        imageView.setImageDrawable(imageDrawable);
+                    }
+                });
+                adpter.notifyDataSetChanged();
+            }
+
+        }
+
+
+
+    }
+
+
+
+
+
+
 
 
     @Override
@@ -114,5 +156,10 @@ public  class SlideShowView extends FrameLayout implements ViewPager.OnPageChang
     @Override
     public void onPageScrollStateChanged(int state) {
 
+    }
+
+
+    public List<View> getImageViewsList() {
+        return imageViewsList;
     }
 }

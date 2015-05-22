@@ -1,29 +1,40 @@
 package com.smallow.community.adapter;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.smallow.common.ImageLoader;
+import com.smallow.common.AsyncImageLoader;
 import com.smallow.community.R;
 import com.smallow.community.api.Api;
 import com.smallow.community.bean.Content;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by smallow on 2015/5/20.
  */
 public class ContentListViewAdapter extends InnerBaseAdapter<Content> {
-    public ImageLoader imageLoader; //用来下载图片的类，后面有介绍
+    //public ImageLoader imageLoader; //用来下载图片的类，后面有介绍
+
+
+
+    // 异步加载图片的线程
+    private AsyncImageLoader asyncImageLoader = new AsyncImageLoader();
+    //当前的缓存
+    private Map<Integer, View> viewMap = new HashMap<Integer, View>();
+
+
 
     public ContentListViewAdapter(List<Content> data,Context context) {
         setData(data, false);
-        imageLoader=new ImageLoader(context);
+        asyncImageLoader=new AsyncImageLoader();
     }
 
     public void notifyDataSetChanged(List<Content> data) {
@@ -53,11 +64,20 @@ public class ContentListViewAdapter extends InnerBaseAdapter<Content> {
         holder.tvTitle.setText(bean.getTitle());
         holder.tvDescription.setText(bean.getDescription());
         holder.tvMoney.setText("￥"+bean.getMoney());
-        String titleImg=bean.getTitleImg();
-        int index=titleImg.lastIndexOf("/");
-        String titleImgName=titleImg.substring(index+1,titleImg.length());
-        //imageLoader.DisplayImage(titleImgName,holder.titleImg);
-        holder.titleImg.setImageResource(R.drawable.pic2);
+        String titleImgUrl=bean.getTitleImg();
+        ImageView imageView = holder.getTitleImg();
+        Drawable cachedImage = asyncImageLoader.loadDrawable(Api.conParam+titleImgUrl,imageView, new AsyncImageLoader.ImageCallback() {
+            @Override
+            public void imageLoaded(Drawable imageDrawable, ImageView imageView, String imageUrl) {
+                imageView.setImageDrawable(imageDrawable);
+            }
+        });
+        if (cachedImage == null) {
+            imageView.setImageResource(R.drawable.pic1);
+        }else{
+            imageView.setImageDrawable(cachedImage);
+        }
+
         return convertView;
     }
 
@@ -69,6 +89,11 @@ public class ContentListViewAdapter extends InnerBaseAdapter<Content> {
         TextView tvMoney;
         TextView tvDescription;
         ImageView titleImg;
+
+
+        public ImageView getTitleImg(){
+            return titleImg;
+        }
     }
 }
 
