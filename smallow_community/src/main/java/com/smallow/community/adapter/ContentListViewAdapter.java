@@ -20,6 +20,7 @@ import java.util.Map;
 /**
  * Created by smallow on 2015/5/20.
  */
+@Deprecated
 public class ContentListViewAdapter extends InnerBaseAdapter<Content> {
     //public ImageLoader imageLoader; //用来下载图片的类，后面有介绍
 

@@ -4,6 +4,10 @@ import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.List;
 
@@ -13,12 +17,16 @@ import java.util.List;
 public class ViewPagerAdpter extends PagerAdapter {
 
     private Context context;
-    private List<View> list;
+    private List<ImageView> list;
+    private ImageLoader imageLoader;
+    private DisplayImageOptions options;
 
 
-    public ViewPagerAdpter(List<View> list, Context context) {
+    public ViewPagerAdpter(List<ImageView> list, Context context,ImageLoader imageLoader,DisplayImageOptions options) {
         this.list = list;
         this.context = context;
+        this.imageLoader=imageLoader;
+        this.options=options;
     }
 
     @Override
@@ -28,6 +36,8 @@ public class ViewPagerAdpter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
+        ImageView imageView = list.get(position);
+        imageLoader.displayImage(imageView.getTag() + "", imageView,options);
         container.addView(list.get(position));
         return list.get(position);
     }

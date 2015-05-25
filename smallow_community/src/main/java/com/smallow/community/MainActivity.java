@@ -1,6 +1,7 @@
 package com.smallow.community;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,6 +10,8 @@ import android.text.format.DateUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -20,17 +23,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshScrollView;
-import com.smallow.common.AsyncImageLoader;
 import com.smallow.common.DataLoadControler;
 import com.smallow.common.network.NetSpirit;
 import com.smallow.common.network.RequestReceiver;
 import com.smallow.common.utils.StrUtils;
-import com.smallow.community.adapter.ContentListViewAdapter;
+import com.smallow.community.adapter.ContentListViewAdapter2;
 import com.smallow.community.api.Api;
 import com.smallow.community.bean.Content;
 import com.smallow.community.interfac.CommonTitleBarOnClickLinstener;
 import com.smallow.community.ui.CommonTitleBar;
-import com.smallow.community.ui.SlideShowView;
 import com.smallow.community.ui.SubMenuWindow;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
     PullToRefreshScrollView mPullRefreshScrollView;
     ScrollView mScrollView;
     private List<Content> mListData;// 存储网络数据
-    private ContentListViewAdapter mAdapter;
+    private ContentListViewAdapter2 mAdapter;
 
 
     /**首次网络请求页码*/
@@ -97,8 +98,9 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
         contentListView= (ListView) findViewById(R.id.contentListView);
         mListData=new ArrayList<Content>();
         //contentListView.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,getData()));
-        mAdapter=new ContentListViewAdapter(mListData,MainActivity.this);
+        mAdapter=new ContentListViewAdapter2(mListData,MainActivity.this);
         contentListView.setAdapter(mAdapter);
+        contentListView.setOnItemClickListener(mContentClickListener);
         setListViewHeightBasedOnChildren(contentListView);
     }
 
@@ -150,9 +152,7 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
             return;
         }
         lastRequestId=NetSpirit.getInstance().httpGet(getRefreshUrl(10), req_type_refersh,requestReceiver);
-
         mHasLoadedOnce = true;
-
     }
 
 
@@ -187,7 +187,6 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
             setListViewHeightBasedOnChildren(contentListView);
             mPullRefreshScrollView.onRefreshComplete();
             mHandler.sendMessage(m);
-            NetSpirit.getInstance().httpGet(getRefreshUrl(5),req_type_refersh,slidShowViewRequestReceiver);
         }
 
         @Override
@@ -197,31 +196,7 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
     };
 
 
-    private RequestReceiver slidShowViewRequestReceiver=new RequestReceiver() {
-        @Override
-        public void onResult(int resultCode, int reqId, Object tag, String resp) {
-            List<Content> currData=new ArrayList<Content>();
-            String[] titleImgs=new String[5];
-            if(resp!=null && !"".equals(resp)){
-                JSONArray array= JSON.parseArray(resp);
-                for (int i=0;i<array.size();i++) {
-                    JSONObject jsonObj = (JSONObject) array.getJSONObject(i);
-                    JSONObject _jsonObj=jsonObj.getJSONObject("merchant");
-                    currData.add(new Content(jsonObj.getInteger("id"),_jsonObj.getString("name"), StrUtils.textCut(jsonObj.getString("title"), 35, "..."),String.valueOf(jsonObj.getFloat("concessionalPrice")),jsonObj.getString("titleImg")));
-                    titleImgs[i]=jsonObj.getString("titleImg");
-                }
-            }
-            SlideShowView slideShowView= (SlideShowView) findViewById(R.id.slideShowView);
-            slideShowView.notifyDataSetChanged(titleImgs);
 
-
-        }
-
-        @Override
-        public void onRequestCanceled(int reqId, Object tag) {
-
-        }
-    };
 
 
     @Override
@@ -287,6 +262,28 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
         // params.height最后得到整个ListView完整显示需要的高度
         listView.setLayoutParams(params);
     }
+
+
+
+
+
+    private AdapterView.OnItemClickListener mContentClickListener=new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            try{
+                Content itemBean=mListData.get(position);
+               // Toast.makeText(MainActivity.this,itemBean.getTitle()+" "+itemBean.getId()+" ",Toast.LENGTH_SHORT).show();
+                if(itemBean!=null){
+                    Intent intent=new Intent(MainActivity.this,ContentDetailAty.class);
+                    intent.putExtra("contentId",itemBean.getId());
+                    startActivity(intent);
+                }
+            }catch (Exception e ){
+                e.printStackTrace();
+            }
+        }
+    };
+
 
 
     private Handler mHandler=new Handler(){

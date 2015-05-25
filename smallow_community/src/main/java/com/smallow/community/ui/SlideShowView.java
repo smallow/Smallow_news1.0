@@ -21,6 +21,7 @@ import java.util.List;
 /**
  * Created by smallow on 2015/5/20.
  */
+@Deprecated
 public  class SlideShowView extends FrameLayout implements ViewPager.OnPageChangeListener{
 
     //轮播图图片数量
@@ -82,14 +83,14 @@ public  class SlideShowView extends FrameLayout implements ViewPager.OnPageChang
         }
 
         dotViewsList = new ArrayList<View>();
-        dotViewsList.add(findViewById(R.id.v_dot1));
+        /*dotViewsList.add(findViewById(R.id.v_dot1));
         dotViewsList.add(findViewById(R.id.v_dot2));
         dotViewsList.add(findViewById(R.id.v_dot3));
         dotViewsList.add(findViewById(R.id.v_dot4));
-        dotViewsList.add(findViewById(R.id.v_dot5));
+        dotViewsList.add(findViewById(R.id.v_dot5));*/
 
         viewPager = (ViewPager) findViewById(R.id.id_viewPager);
-        adpter = new ViewPagerAdpter(imageViewsList,context);
+        adpter = new ViewPagerAdpter(null,context,null,null);
         viewPager.setFocusable(true);
         viewPager.setAdapter(adpter);
         viewPager.setOnPageChangeListener(this);
