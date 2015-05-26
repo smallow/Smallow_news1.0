@@ -18,11 +18,11 @@ public class ContentDetailAty extends Activity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.aty_content_detail);
-        /*Intent intent=getIntent();
-        if(intent!=null)
-            contentId=intent.getIntExtra("contentId",0);*/
+        Intent intent=getIntent();
+        if(intent!=null){
+              contentId=intent.getIntExtra("contentId",0);
 
-        textView= (TextView) findViewById(R.id.ttTest);
-        textView.setText("test");
+        }
+
     }
 }

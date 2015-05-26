@@ -15,16 +15,214 @@
         cumstom:titleColor="@android:color/white"
         cumstom:rightImgSrc="@drawable/nav_menu"
         cumstom:leftTvText="首页"
-        cumstom:leftImgSrc="@drawable/nav_back"
-        />
+        cumstom:leftImgSrc="@drawable/nav_back" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text"
-        android:id="@+id/ttTest"
-        android:layout_gravity="center_horizontal" />
+
+    <com.handmark.pulltorefresh.library.PullToRefreshScrollView xmlns:ptr="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/pull_refresh_scrollview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        ptr:ptrAnimationStyle="flip">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <com.smallow.community.ui.SlideShowView2
+                android:id="@+id/slideShowView"
+                android:layout_width="match_parent"
+                android:layout_height="180dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:padding="5dp"
+                android:background="@drawable/shape_layoutline_color">
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="40dp"
+                    android:text="75￥"
+                    android:textColor="@android:color/holo_red_light"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:textSize="24sp"
+                    android:padding="5dp" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="40dp"
+                    android:text="立即抢购"
+                    android:textSize="18sp"
+                    android:textColor="@android:color/white"
+                    android:layout_alignParentRight="true"
+                    android:background="@android:color/holo_red_light"
+                    android:padding="5dp"
+                    android:gravity="center"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:padding="5dp"
+                android:orientation="horizontal"
+                android:background="@drawable/shape_layoutline_top_only_color">
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="40dp"
+                    android:text="免预约"
+                    android:textColor="#32CD32"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:padding="5dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="40dp"
+                    android:text="已售998"
+                    android:textColor="#CFCFCF"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:padding="5dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:padding="5dp"
+                android:background="@drawable/shape_layoutline_top_only_color">
+
+                <TextView
+                    android:id="@+id/hpd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="好评度"
+                    android:textColor="#000000"
+                    android:padding="5dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="93%"
+                    android:textColor="@android:color/holo_red_light"
+                    android:layout_centerVertical="true"
+                    android:padding="5dp"
+                    android:layout_toEndOf="@+id/hpd" />
+
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="40dp"
+                    android:text="共2676条评论"
+                    android:textColor="#CFCFCF"
+                    android:layout_alignParentRight="true"
+                    android:padding="5dp"
+                    android:layout_centerVertical="true" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:padding="5dp"
+                android:background="@drawable/shape_layoutline_color">
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="40dp"
+                    android:text="商家信息"
+                    android:textColor="#969696"
+                    android:textSize="16sp"
+                    android:padding="5dp" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:padding="5dp"
+                android:background="@drawable/shape_layoutline_color" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:text="香港大班煲仔饭烧腊馆"
+                    android:id="@+id/textView"
+                    android:textColor="#000000"
+                    android:layout_alignParentLeft="true"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="高新区迎春街与银屏路交叉口东北角"
+                    android:id="@+id/textView2"
+                    android:layout_marginTop="5dp"
+                    android:layout_below="@+id/textView"
+                    android:layout_alignParentLeft="true"
+                    />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/gps_1"
+                    android:layout_alignParentLeft="true"
+                    android:layout_below="@+id/textView2"
+                    android:layout_marginTop="5dp"
+                    android:id="@+id/gps"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1.2km"
+                    android:id="@+id/textView3"
+                    android:layout_marginTop="5dp"
+                    android:layout_toEndOf="@+id/gps"
+                    android:layout_below="@+id/textView2"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="电话:"
+                    android:layout_marginTop="5dp"
+                    android:layout_below="@+id/textView3"
+                    android:id="@+id/dh"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="13603456869"
+                    android:layout_marginTop="5dp"
+                    android:layout_toEndOf="@+id/dh"
+                    android:layout_below="@+id/textView3"
+                    android:id="@+id/phone"
+                    />
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/phone_64_64"
+                    android:layout_below="@+id/textView3"
+                    android:layout_alignParentRight="true"
+
+
+                    />
+            </RelativeLayout>
+
+
+        </LinearLayout>
+
+    </com.handmark.pulltorefresh.library.PullToRefreshScrollView>
 
 
 </LinearLayout>
