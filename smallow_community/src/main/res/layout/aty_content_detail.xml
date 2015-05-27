@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
     <com.smallow.community.ui.CommonTitleBar
-        android:id="@+id/titleBar1"
+        android:id="@+id/content_detail_titlebar"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="#F14E41"
@@ -19,7 +19,7 @@
 
 
     <com.handmark.pulltorefresh.library.PullToRefreshScrollView xmlns:ptr="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/pull_refresh_scrollview"
+        android:id="@+id/content_detail_ptr"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         ptr:ptrAnimationStyle="flip">
@@ -41,11 +41,12 @@
                 android:background="@drawable/shape_layoutline_color">
 
                 <TextView
+                    android:id="@+id/price"
                     android:layout_width="150dp"
                     android:layout_height="40dp"
                     android:text="75￥"
                     android:textColor="@android:color/holo_red_light"
-                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:textSize="24sp"
                     android:padding="5dp" />
@@ -56,7 +57,7 @@
                     android:text="立即抢购"
                     android:textSize="18sp"
                     android:textColor="@android:color/white"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:background="@android:color/holo_red_light"
                     android:padding="5dp"
                     android:gravity="center"
@@ -75,7 +76,7 @@
                     android:layout_height="40dp"
                     android:text="免预约"
                     android:textColor="#32CD32"
-                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:padding="5dp"
                     android:layout_weight="1" />
@@ -85,7 +86,7 @@
                     android:layout_height="40dp"
                     android:text="已售998"
                     android:textColor="#CFCFCF"
-                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:padding="5dp"
                     android:layout_weight="1" />
@@ -108,7 +109,7 @@
                     android:text="好评度"
                     android:textColor="#000000"
                     android:padding="5dp"
-                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
                     android:layout_centerVertical="true" />
 
                 <TextView
@@ -125,7 +126,7 @@
                     android:layout_height="40dp"
                     android:text="共2676条评论"
                     android:textColor="#CFCFCF"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:padding="5dp"
                     android:layout_centerVertical="true" />
             </RelativeLayout>
@@ -153,32 +154,31 @@
                 android:layout_height="120dp"
                 android:padding="5dp"
                 android:background="@drawable/shape_layoutline_color" >
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="香港大班煲仔饭烧腊馆"
-                    android:id="@+id/textView"
+                    android:id="@+id/merchant_name"
                     android:textColor="#000000"
-                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
                     />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="高新区迎春街与银屏路交叉口东北角"
-                    android:id="@+id/textView2"
+                    android:id="@+id/merchant_address"
                     android:layout_marginTop="5dp"
-                    android:layout_below="@+id/textView"
+                    android:layout_below="@+id/merchant_name"
                     android:layout_alignParentLeft="true"
                     />
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/gps_1"
-                    android:layout_alignParentLeft="true"
-                    android:layout_below="@+id/textView2"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/merchant_address"
                     android:layout_marginTop="5dp"
                     android:id="@+id/gps"
                     />
@@ -189,7 +189,7 @@
                     android:id="@+id/textView3"
                     android:layout_marginTop="5dp"
                     android:layout_toEndOf="@+id/gps"
-                    android:layout_below="@+id/textView2"
+                    android:layout_below="@+id/merchant_address"
                     />
                 <TextView
                     android:layout_width="wrap_content"
@@ -206,20 +206,50 @@
                     android:layout_marginTop="5dp"
                     android:layout_toEndOf="@+id/dh"
                     android:layout_below="@+id/textView3"
-                    android:id="@+id/phone"
+                    android:id="@+id/merchant_mobilephone"
                     />
                 <ImageView
+                    android:id="@+id/call_merchant"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/phone_64_64"
                     android:layout_below="@+id/textView3"
-                    android:layout_alignParentRight="true"
-
+                    android:layout_alignParentEnd="true"
 
                     />
             </RelativeLayout>
 
-
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="15dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:padding="5dp"
+                android:background="@drawable/shape_layoutline_color">
+                <TextView
+                    android:layout_width="150dp"
+                    android:layout_height="40dp"
+                    android:text="详细信息"
+                    android:textColor="#969696"
+                    android:textSize="16sp"
+                    android:padding="5dp" />
+            </LinearLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:background="@drawable/shape_layoutline_color"
+                >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="200dip"
+                android:gravity="top"
+                android:text="今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子今天是个好日子"
+                android:inputType="textMultiLine"
+                android:textColor="#000000"
+                />
+           </RelativeLayout>
         </LinearLayout>
 
     </com.handmark.pulltorefresh.library.PullToRefreshScrollView>

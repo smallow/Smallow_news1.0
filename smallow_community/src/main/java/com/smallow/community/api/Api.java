@@ -13,4 +13,7 @@ public class Api {
     public static final String getTop10MerchantContent="mobile/getMerchantContent.do";
     public static final int getTop10MerchantContentRid=1;
 
+    public static final String getContentById="mobile/getContentById.do";
+    public static final int getContentByIdRid=2;
+
 }
