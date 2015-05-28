@@ -29,10 +29,15 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <com.smallow.community.ui.SlideShowView2
+            <!--<com.smallow.community.ui.SlideShowView2
                 android:id="@+id/slideShowView"
                 android:layout_width="match_parent"
+                android:layout_height="180dp" />-->
+            <ImageView
+                android:id="@+id/content_detail_titleImg"
+                android:layout_width="match_parent"
                 android:layout_height="180dp" />
+
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -253,6 +258,8 @@
         </LinearLayout>
 
     </com.handmark.pulltorefresh.library.PullToRefreshScrollView>
+
+
 
 
 </LinearLayout>

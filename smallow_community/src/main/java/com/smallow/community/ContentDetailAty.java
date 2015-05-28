@@ -3,6 +3,7 @@ package com.smallow.community;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ScrollView;
@@ -12,6 +13,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshScrollView;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.smallow.common.network.NetSpirit;
 import com.smallow.common.network.RequestReceiver;
 import com.smallow.community.api.Api;
@@ -33,7 +35,7 @@ public class ContentDetailAty extends Activity {
 
     PullToRefreshScrollView mPullRefreshScrollView;
     ScrollView mScrollView;
-
+    private ImageLoader imageLoader;
 
     /** 标志位，标志已经初始化完成 */
     private boolean isPrepared;
@@ -74,7 +76,8 @@ public class ContentDetailAty extends Activity {
         titleBar.setOnCommonTitleBarOnClickListener(new CommonTitleBarOnClickLinstener() {
             @Override
             public void leftOnclick() {
-                startActivity(new Intent(ContentDetailAty.this,MainActivity.class));
+                //startActivity(new Intent(ContentDetailAty.this,MainActivity.class));
+                ContentDetailAty.this.finish();
             }
 
             @Override
@@ -111,6 +114,7 @@ public class ContentDetailAty extends Activity {
         merchant_address=(TextView)findViewById(R.id.merchant_address);
         merchant_mobilephone= (TextView) findViewById(R.id.merchant_mobilephone);
         call_merchant= (ImageView) findViewById(R.id.call_merchant);
+        imageLoader=ImageLoader.getInstance();
         isPrepared = true;
 
     }
@@ -135,10 +139,15 @@ public class ContentDetailAty extends Activity {
             if(resp!=null && !"".equals(resp)){
                 JSONObject object= JSON.parseObject(resp);
                 String _price=String.valueOf(object.getBigDecimal("concessionalPrice"));
-                price.setText(_price);
+                price.setText(_price+"￥");
                 merchant_name.setText(object.getJSONObject("merchant").getString("name"));
-                merchant_address.setText(object.getString("address"));
-                merchant_mobilephone.setText(object.getString("mobilephone")==null?object.getString("telphone"):object.getString("mobilephone"));
+                merchant_address.setText(object.getString("address")==null?"":object.getString("address"));
+                merchant_mobilephone.setText(object.getString("mobilephone").equals("null")?object.getString("telphone"):object.getString("mobilephone"));
+                String titleImg=object.getString("titleImg");
+                if(titleImg!=null && !"".equals(titleImg)){
+                    ImageView imageView= (ImageView) findViewById(R.id.content_detail_titleImg);
+                    imageLoader.displayImage(Api.conParam+titleImg,imageView);
+                }
             }
         }
 
@@ -147,6 +156,19 @@ public class ContentDetailAty extends Activity {
 
         }
     };
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode==KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+           /* Intent intent=new Intent();
+            intent.setClass(ContentDetailAty.this, MainActivity.class);
+            startActivity(intent);*/
+            ContentDetailAty.this.finish();
+        }
+        return false;
+
+    }
 
     class ContentDetailSubMenuData implements SubMenuWindow.SubMenu{
         private String name;

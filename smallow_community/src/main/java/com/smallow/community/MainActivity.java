@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
@@ -67,6 +68,8 @@ public class MainActivity extends Activity  implements DataLoadControler<Content
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        ProgressBar progressBar= (ProgressBar) findViewById(R.id.progressBar);
+
         initCommonTitleBar();
         initContentListView();
         initPullToRefreshScrollView();

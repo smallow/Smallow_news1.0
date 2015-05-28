@@ -9,6 +9,25 @@
     android:focusableInTouchMode="true"
     >
 
+
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminateOnly="false"
+        style="@style/ProgressBar.Horizontal"
+        android:indeterminate="true"/>
+
+    <ProgressBar
+
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="50dip"
+        android:layout_height="50dp"
+
+
+        />
+
+
     <com.smallow.community.ui.CommonTitleBar
         android:id="@+id/titleBar1"
         android:layout_width="match_parent"
@@ -54,4 +73,6 @@
 
 
     </com.handmark.pulltorefresh.library.PullToRefreshScrollView>
+
+
 </LinearLayout>
