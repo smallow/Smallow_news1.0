@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:wheel="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/data_state_ui_block"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:minHeight="50dp"
+        android:minWidth="50dp">
+
+        <!--<ProgressBar
+            android:id="@+id/data_state_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/default_indeterminate_progressbar" />-->
+
+
+        <!--<com.pnikosis.materialishprogress.ProgressWheel
+            android:id="@+id/data_state_progress"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            wheel:matProg_barColor="#5588FF"
+            wheel:matProg_progressIndeterminate="true" />-->
+
+       <!-- <ProgressBar
+            android:id="@+id/data_state_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateDrawable="@drawable/frame_loading" />-->
+        <ProgressBar
+            android:id="@+id/data_state_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateDrawable="@drawable/rotate_loading_github"
+            android:indeterminateDuration="1800" />
+        <!--<ProgressBar
+            android:id="@+id/data_state_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateDrawable="@drawable/rotate_loading_360"
+            android:indeterminateDuration="1800" />-->
+       <!-- <com.smallow.community.ui.CustomClipLoading
+            android:id="@+id/data_state_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />-->
+
+
+        <TextView
+            android:id="@+id/data_state_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:textColor="#1b5fa0"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+
+</merge>

@@ -5,4 +5,11 @@
         <!-- Customize your theme here. -->
     </style>
     <style name="ProgressBar.Horizontal" parent="@android:style/Widget.Holo.ProgressBar.Horizontal"></style>
+
+    <style name="default_indeterminate_progressbar" parent="@android:style/Widget.ProgressBar.Inverse">
+
+    </style>
+
+    <style name="default_indeterminate_progressbar_2" parent="@android:style/Widget.ProgressBar.Large.Inverse">
+    </style>
 </resources>

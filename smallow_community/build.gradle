@@ -33,4 +33,5 @@ dependencies {
     compile project(':library')
     compile project(':smallow_common')
     compile files('libs/universal-image-loader-1.9.3.jar')
+    /*compile 'com.pnikosis:materialish-progress:1.5'*/
 }

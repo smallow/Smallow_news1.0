@@ -1,5 +1,7 @@
 package com.smallow.common.utils;
 
+import android.view.View;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,5 +42,15 @@ public class Utils {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public static void checkVisibility(View v, int visibility) {
+        if (v == null) {
+            return;
+        }
+        if (v.getVisibility() == visibility) {
+            return;
+        }
+        v.setVisibility(visibility);
     }
 }
